@@ -3,9 +3,15 @@
 
 #include "GameWorld.h"
 #include "GameConstants.h"
+#include "Actor.h"
 #include <string>
+#include <memory>
+
+const int ROW = 30;
+const int COL = 30;
 
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
+class Ice;
 
 class StudentWorld : public GameWorld    //inherited from public gameworld
 {
@@ -14,15 +20,9 @@ public:
 		: GameWorld(assetDir)
 	{
 	}
-
+	void createIce();
 	virtual int init(){
-		class Ice {
-		public:
-			void createIce();
-		private:
-
-	};
-	
+		createIce();
 		return GWSTATUS_CONTINUE_GAME;
 	}
 
@@ -39,6 +39,9 @@ public:
 	}
 
 private:
+	Ice* makeIce;
+	//std::list<Ice*> iceContainer;
+	std::unique_ptr<Ice> iceContainer[COL][ROW];
 };
 
 #endif // STUDENTWORLD_H_
