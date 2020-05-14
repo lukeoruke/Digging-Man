@@ -7,8 +7,8 @@
 #include <string>
 #include <memory>
 
-const int ROW = 60;
-const int COL = 60;
+const int MAX_ROW = 60;
+const int MAX_COL = 60;
 
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
 class Ice;
@@ -44,7 +44,7 @@ public:
 private:
 	Ice* makeIdce;
 	//std::list<Ice*> iceContainer;
-	std::unique_ptr<Ice> iceContainer[COL][ROW];
+	std::unique_ptr<Ice> iceContainer[MAX_ROW][MAX_COL];
 };
 
 #endif // STUDENTWORLD_H_
