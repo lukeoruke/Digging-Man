@@ -20,9 +20,16 @@ public:
 
 class Iceman : public Actor
 {
+public:
 	Iceman();
 	~Iceman();
 	void doSomething();
+	//void overlap(std::unique_ptr<Ice> iceField[60][60], Iceman* player);
+private:
+	int m_HP;
+	int m_water_amnt;
+	int m_sonar_amnt;
+	int m_gold_amnt;
 
 };
 

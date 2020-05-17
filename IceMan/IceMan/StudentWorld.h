@@ -21,8 +21,10 @@ public:
 	{
 	}
 	void createIce();
+	void createPlayer();
 	virtual int init(){
 		createIce();
+		createPlayer();
 		return GWSTATUS_CONTINUE_GAME;
 	}
 
@@ -30,8 +32,13 @@ public:
 	{
 		// This code is here merely to allow the game to build, run, and terminate after you hit enter a few times.
 		// Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
-		decLives();
+		
+		//https://www.modernescpp.com/index.php/c-core-guidelines-passing-smart-pointer
 
+		//player->overlap(std::move(iceContainer), player);
+
+
+		decLives();
 		//TEMP///
 		return GWSTATUS_CONTINUE_GAME;
 		//return GWSTATUS_PLAYER_DIED;
@@ -42,9 +49,9 @@ public:
 	}
 
 private:
-	Ice* makeIdce;
-	//std::list<Ice*> iceContainer;
+	Ice* ice;
 	std::unique_ptr<Ice> iceContainer[MAX_ROW][MAX_COL];
+	Iceman* player;
 };
 
 #endif // STUDENTWORLD_H_
