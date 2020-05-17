@@ -7,8 +7,7 @@
 #include <string>
 #include <memory>
 
-const int MAX_ROW = 60;
-const int MAX_COL = 60;
+const int MAX_WINDOW = 64;
 
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
 class Ice;
@@ -50,7 +49,7 @@ public:
 
 private:
 	Ice* ice;
-	std::unique_ptr<Ice> iceContainer[MAX_ROW][MAX_COL];
+	std::unique_ptr<Ice> iceContainer[MAX_WINDOW][MAX_WINDOW-4];
 	Iceman* player;
 };
 
