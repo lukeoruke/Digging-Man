@@ -24,11 +24,14 @@ Ice::~Ice() {}
 void Ice::doSomething(){};
 
 //////////////////////// ICEMAN //////////////////     pg 27
-Iceman::Iceman():Actor(IID_PLAYER,ICEMAN_START_X,ICEMAN_START_Y,right,1.0,0){
+Iceman::Iceman(StudentWorld* world)
+	:Actor(IID_PLAYER, ICEMAN_START_X, ICEMAN_START_Y, right, 1.0, 0)
+{
 	m_HP = 10;
 	m_water_amnt = 5;
 	m_sonar_amnt = 1;
 	m_gold_amnt = 0;
+	m_world = world;
 }
 Iceman::~Iceman(){}
 
@@ -41,9 +44,18 @@ Iceman::~Iceman(){}
 //
 //	}
 //}
+
+StudentWorld* Iceman:: getWorld() {
+	return m_world;
+}
 void Iceman::doSomething() {
 	if (m_HP <= 0) {
 		return;
 	} 
+
+	//pg30
+	int ch;
+	getWorld()->getKey(ch);
+
 
 };

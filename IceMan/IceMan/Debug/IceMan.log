@@ -1,4 +1,19 @@
-﻿  Actor.cpp
-  StudentWorld.cpp
+﻿  StudentWorld.cpp
+c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\actor.h(25): error C2061: syntax error: identifier 'StudentWorld'
+c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\actor.h(28): error C2143: syntax error: missing ';' before '*'
+c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\actor.h(28): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\actor.h(28): error C2238: unexpected token(s) preceding ';'
+c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\actor.h(35): error C2143: syntax error: missing ';' before '*'
+c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\actor.h(35): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\actor.h(35): error C2238: unexpected token(s) preceding ';'
+c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\studentworld.cpp(29): error C2664: 'Iceman::Iceman(const Iceman &)': cannot convert argument 1 from 'StudentWorld *' to 'const Iceman &'
+  c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\studentworld.cpp(29): note: Reason: cannot convert from 'StudentWorld *' to 'const Iceman'
+  c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\studentworld.cpp(29): note: No constructor could take the source type, or constructor overload resolution was ambiguous
+  Actor.cpp
+c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\studentworld.h(53): error C2143: syntax error: missing ';' before '*'
+c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\studentworld.h(53): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\studentworld.h(53): error C2238: unexpected token(s) preceding ';'
+c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\studentworld.h(37): error C2065: 'player': undeclared identifier
+c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\studentworld.h(37): error C2227: left of '->doSomething' must point to class/struct/union/generic type
+  c:\users\luke\desktop\iceman-skeleton-windows\iceman\iceman\studentworld.h(37): note: type is 'unknown-type'
   Generating Code...
-  IceMan.vcxproj -> C:\Users\Tyler\source\repos\AndrewOki\ICE-MAN-PROJECT\IceMan\Debug\IceMan.exe
