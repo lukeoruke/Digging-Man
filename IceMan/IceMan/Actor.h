@@ -4,35 +4,39 @@
 #include "GraphObject.h"
 #include "StudentWorld.h"
 
+class StudentWorld;
+
 class Actor : public GraphObject
 {
 	public:
 		Actor(int imageID, int startX, int startY, Direction dir, double size, int depth);
+		StudentWorld* getWorld() const;
 		~Actor();
+		virtual void doSomething() = 0;
+	private:
+		StudentWorld* m_world;
 };
 //////////////////////// ICE //////////////////
-class Ice : public Actor   //grpah object on pg 24
+class Ice : public GraphObject   //grpah object on pg 24
 {
 public:
 	Ice(int x, int y);
 	~Ice();
-	void doSomething();
+	virtual void doSomething();
 };
 //////////////////////// ICE MAN //////////////////
 class Iceman : public Actor
 {
 public:
-	Iceman(StudentWorld* world);
+	Iceman();
 	~Iceman();
-	void doSomething();
-	StudentWorld* getWorld();
+	virtual void doSomething();
 	//void overlap(std::unique_ptr<Ice> iceField[60][60], Iceman* player);
 private:
 	int m_HP;
 	int m_water_amnt;
 	int m_sonar_amnt;
 	int m_gold_amnt;
-	StudentWorld* m_world;
 };
 
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
