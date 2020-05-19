@@ -7,15 +7,21 @@ const int ICEMAN_START_Y = 60;
 
 
 
-								///GRAPH OBJ
-								///    |
-							//////________
-							/////|      |
-							////ICE		Actor	
-							////		 |
-							////_____________________
-							////|		|            |
-						  ////ICEMAN   PEOPLE	    EXC
+//  GRAPH OBJ
+//      |
+//   ________
+//   |      |
+//  ICE	   ACTOR	
+//           |
+// ______________________________________________________
+//         |	                 |                      |
+// BOULDER,SQUIRT(maybe)       PERSON                  GOODIES
+//                               |
+//                           ___________
+//                          |           |
+//                       ICEMAN      Normal Protestor
+//                                           |
+//                                       HCPROTESTOR
 
 //////////////////////// ACTOR //////////////////  pg 24
 Actor::Actor(StudentWorld* world, int imageID, int startX, int startY, Direction dir, double size, int depth)
@@ -72,40 +78,63 @@ Iceman::~Iceman(){}
 void Iceman::doSomething() {
 	//check if the iceman is alive
 	if (m_HP <= 0) {
-		setisAlive(false);
+		setIsAlive(false);
 		return;
-	} 
+	}
+
 	getWorld()->overlap();
+
 	//pg30
 	int ch;
 	if (getWorld()->getKey(ch) == true) {
-		switch(ch)
+		switch (ch)
 		{
-			case KEY_PRESS_LEFT:
+		case KEY_PRESS_ESCAPE:
+			setIsAlive(false);
+			break;
+		case KEY_PRESS_SPACE:
+			if (m_water_amnt > 0) {
+				GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);
+				m_water_amnt--;
+				if (!(getWorld()->iceInFront())) {
+					//TODO: Create Squirt Object (using players location and direction), then give it to StudentWorld to manage
+					setVisible(false); //for testing purposes only
+				}
+
+			}
+			break;
+		case KEY_PRESS_LEFT:  //x-1
+			if (getDirection() != left)
 				setDirection(left);
-				if (getX() > 0)
-					moveTo(getX() - 1, getY());
-				break;
-			case KEY_PRESS_RIGHT:
+			else if (getX() > 0)
+				moveTo(getX() - 1, getY());
+			break;
+		case KEY_PRESS_RIGHT: //x+1
+			if (getDirection() != right)
 				setDirection(right);
-				if (getX() < MAX_WINDOW - 4)
-					moveTo(getX() + 1, getY());
-				break;
-			case KEY_PRESS_DOWN:
+			else if(getX() < MAX_WINDOW-4)
+				moveTo(getX() + 1, getY());
+			break;
+		case KEY_PRESS_DOWN:  //y-1
+			if (getDirection() != down)
 				setDirection(down);
-				if (getY() > 0)
-					moveTo(getX(), getY() - 1);
-				break;
-			case KEY_PRESS_UP:
+			else if (getY() > 0)
+				moveTo(getX(), getY() - 1);
+			break;
+		case KEY_PRESS_UP: //y+1
+			if (getDirection() != up)
 				setDirection(up);
-				if (getY() < MAX_WINDOW - 4)
-					moveTo(getX(), getY() + 1);
-				break;
-			case KEY_PRESS_SPACE:
-				break;
-			case KEY_PRESS_TAB:
-				break;
+			else if (getY() < MAX_WINDOW-4)
+				moveTo(getX(), getY() + 1);
+			break;
+		case KEY_PRESS_TAB:
+			if (m_gold_amnt > 0) {
 				
+				//TODO: Create GoldNugget Object
+				m_gold_amnt--;
+			}
+			break;
+			
 		}
 	}
 	
