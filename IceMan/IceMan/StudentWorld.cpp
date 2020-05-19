@@ -64,6 +64,29 @@ void StudentWorld::overlap() {
 		}
 	}
 }
+bool StudentWorld::iceInFront() {
+	switch (getPlayer()->getDirection()) {
+	case GraphObject::Direction::left:
+		if (iceContainer[getPlayer()->getX() - 1][getPlayer()->getY()])
+			return true;
+		break;
+	case GraphObject::Direction::right:
+		if (iceContainer[getPlayer()->getX() + 4][getPlayer()->getY()])
+			return true;
+		break;
+	case GraphObject::Direction::down:
+		if (iceContainer[getPlayer()->getX()][getPlayer()->getY() - 1])
+			return true;
+		break;
+	case GraphObject::Direction::up:
+		if (iceContainer[getPlayer()->getX()][getPlayer()->getY() + 4])
+			return true;
+		break;
+	default:
+		return false;
+	}
+}
+
 void StudentWorld::deleteIce(int x, int y){
 	 iceContainer[x][y].reset();
 }
