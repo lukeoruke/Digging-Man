@@ -23,7 +23,11 @@ public:
 	//function declrations
 	void createIce();
 	void createPlayer();
+	Iceman* getPlayer() const;
+	//Ice* getIce(int x, int y) const;
+	void overlap();
 	StudentWorld* getStudentWorld();
+	void deleteIce(int x, int y);
 
 	virtual int init(){
 		//std::vector<Actor> Actors;   //pg 16
