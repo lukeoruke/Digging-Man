@@ -26,6 +26,7 @@ public:
 	Iceman* getPlayer() const;
 	//Ice* getIce(int x, int y) const;
 	void overlap();
+	bool iceInFront();
 	StudentWorld* getStudentWorld();
 	void deleteIce(int x, int y);
 
