@@ -9,12 +9,15 @@ class StudentWorld;
 class Actor : public GraphObject
 {
 	public:
-		Actor(int imageID, int startX, int startY, Direction dir, double size, int depth);
+		Actor(StudentWorld* world,int imageID, int startX, int startY, Direction dir, double size, int depth);
 		StudentWorld* getWorld() const;
 		~Actor();
 		virtual void doSomething() = 0;
+		bool setisAlive(bool status);
+		bool getisAlive();
 	private:
 		StudentWorld* m_world;
+		bool m_isAlive;
 };
 //////////////////////// ICE //////////////////
 class Ice : public GraphObject   //grpah object on pg 24
@@ -28,7 +31,7 @@ public:
 class Iceman : public Actor
 {
 public:
-	Iceman();
+	Iceman(StudentWorld* world);
 	~Iceman();
 	virtual void doSomething();
 	//void overlap(std::unique_ptr<Ice> iceField[60][60], Iceman* player);
