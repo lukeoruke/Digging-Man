@@ -46,9 +46,33 @@ void StudentWorld::createIce() {
 	}
 
 }
+
+//Ice* StudentWorld::getIce(int x, int y) const{
+//	iceContainer[x][y].get();
+//	return iceContainer[x][y].get;
+//}
+void StudentWorld::overlap() {
+	int playerX = getPlayer()->getX();
+	int playerY = getPlayer()->getY();
+
+	for (int x = playerX; playerX < x + 4; playerX++) {
+		for (int y = playerY; playerY < y + 4; playerY++) {
+			if (iceContainer[x][y] != nullptr) {
+				iceContainer[x][y].reset();
+				iceContainer[x][y] = nullptr;
+			}
+		}
+	}
+}
+void StudentWorld::deleteIce(int x, int y){
+	 iceContainer[x][y].reset();
+}
 ///////////////////ICEMAN/////////////////
 void StudentWorld::createPlayer() {
 	player = new Iceman(this);
+}
+Iceman* StudentWorld::getPlayer() const {
+	return player;
 }
 
 //not used yet
