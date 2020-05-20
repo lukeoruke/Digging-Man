@@ -32,7 +32,7 @@ Actor::Actor(StudentWorld* world, int imageID, int startX, int startY, Direction
 }
 //void Actor :: doSomething() {}
 
-StudentWorld* Actor::getWorld() const{
+StudentWorld* Actor::getWorld() const {
 	return  m_world;
 }
 
@@ -42,25 +42,24 @@ bool Actor::setisAlive(bool status) {
 bool Actor::getisAlive() {
 	return m_isAlive;
 }
-Actor::~Actor(){
-}
+Actor::~Actor() {}
 //////////////////////// ICE //////////////////
-Ice::Ice(int row, int col) :GraphObject(IID_ICE,row,col,right,0.25,3) {
+Ice::Ice(int row, int col) :GraphObject(IID_ICE, row, col, right, 0.25, 3) {
 	setVisible(true);
 }
-Ice::~Ice() {}
+Ice::~Ice() {};
 //void Ice::doSomething(){};
 
 //////////////////////// ICEMAN //////////////////     pg 27
 Iceman::Iceman(StudentWorld* world)
-	:Actor(world,IID_PLAYER, ICEMAN_START_X, ICEMAN_START_Y, right, 1.0, 0)
+	:Actor(world, IID_PLAYER, ICEMAN_START_X, ICEMAN_START_Y, right, 1.0, 0)
 {
 	m_HP = 10;
 	m_water_amnt = 5;
 	m_sonar_amnt = 1;
 	m_gold_amnt = 0;
 }
-Iceman::~Iceman(){}
+Iceman::~Iceman() {}
 
 //first attempt to delete Ice
 //bool Iceman::overlap(std::unique_ptr<Ice> iceField[64][60], Iceman* player) {
@@ -78,7 +77,7 @@ Iceman::~Iceman(){}
 void Iceman::doSomething() {
 	//check if the iceman is alive
 	if (m_HP <= 0) {
-		setIsAlive(false);
+		setisAlive(false);
 		return;
 	}
 
@@ -90,7 +89,7 @@ void Iceman::doSomething() {
 		switch (ch)
 		{
 		case KEY_PRESS_ESCAPE:
-			setIsAlive(false);
+			setisAlive(false);
 			break;
 		case KEY_PRESS_SPACE:
 			if (m_water_amnt > 0) {
@@ -112,7 +111,7 @@ void Iceman::doSomething() {
 		case KEY_PRESS_RIGHT: //x+1
 			if (getDirection() != right)
 				setDirection(right);
-			else if(getX() < MAX_WINDOW-4)
+			else if (getX() < MAX_WINDOW - 4)
 				moveTo(getX() + 1, getY());
 			break;
 		case KEY_PRESS_DOWN:  //y-1
@@ -124,20 +123,25 @@ void Iceman::doSomething() {
 		case KEY_PRESS_UP: //y+1
 			if (getDirection() != up)
 				setDirection(up);
-			else if (getY() < MAX_WINDOW-4)
+			else if (getY() < MAX_WINDOW - 4)
 				moveTo(getX(), getY() + 1);
 			break;
 		case KEY_PRESS_TAB:
 			if (m_gold_amnt > 0) {
-				
+
 				//TODO: Create GoldNugget Object
 				m_gold_amnt--;
 			}
 			break;
-			
+
 		}
 	}
-	
-	  
+
+
 
 };
+
+
+//class Boulder {
+//
+//};
