@@ -16,10 +16,15 @@ class Iceman;
 class StudentWorld : public GameWorld    //inherited from public gameworld
 {
 public:
+	//constructor
 	StudentWorld(std::string assetDir)
 		: GameWorld(assetDir)
 	{
+		player = nullptr;
 	}
+	//destructor
+	~StudentWorld();
+	
 	//function declrations
 	void createIce();
 	void createPlayer();
@@ -27,13 +32,19 @@ public:
 	//void createProtestor();
 	//void createHardcoreProtestor();
 	//std::unique_ptr<Iceman> getPlayer() const; 
+	
+	//methods
+	int lvlBoulder(); //returns amount of boulders in current level
+	int lvlGold(); //returns amount of gold in current level
+	int lvlOil(); //returns amount of oil in current level
 	void overlap();
 	bool iceInFront();
-	StudentWorld* getStudentWorld();
 	void deleteIce(int x, int y);
+	
+	StudentWorld* getStudentWorld();
+	
 
 	virtual int init(){
-		//std::vector<Actor> Actors;   //pg 16
 		createIce();
 		createPlayer();
 		return GWSTATUS_CONTINUE_GAME;
@@ -42,14 +53,17 @@ public:
 	virtual int move();
 
 	virtual void cleanUp();
-	~StudentWorld();
+	
 
 private:
-	Ice* ice;
+	Ice* ice; //purpose?
+	StudentWorld* world; //purpose?
+	//Iceman* player; //purpose?
+	
 	std::unique_ptr<Ice> iceContainer[MAX_WINDOW][MAX_WINDOW];
-	/*Iceman* player;*/
 	std::unique_ptr<Iceman> player;
-	StudentWorld* world;
+	std::vector<Actor*> actors;
+
 };
 
 #endif // STUDENTWORLD_H_
