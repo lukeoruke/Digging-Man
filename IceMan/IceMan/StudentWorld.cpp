@@ -1,4 +1,5 @@
 #include "StudentWorld.h"
+#include "GameController.h"
 #include <string>
 using namespace std;
 #include <memory>
@@ -35,6 +36,24 @@ int StudentWorld::move() {
 	return GWSTATUS_CONTINUE_GAME;
 	//return GWSTATUS_PLAYER_DIED;
 }
+
+
+// check if we have to use the respecitve Destructors aka  ~
+void StudentWorld::cleanUp() {
+	player.reset();
+	for (int row = 0; row < MAX_WINDOW; row++) {
+		for (int col = 0; col < MAX_WINDOW - 4; col++) {
+			if (row < TUNNEL_COL_START || row > TUNNEL_COL_END || col < TUNNEL_ROW) {
+				iceContainer[row][col].reset();
+			}
+		}
+	}
+
+}
+
+StudentWorld::~StudentWorld() {
+	cleanUp();
+}
 ///////////////////ICE/////////////////
 void StudentWorld::createIce() {
 	for (int row = 0; row < MAX_WINDOW; row++) {
@@ -46,40 +65,37 @@ void StudentWorld::createIce() {
 	}
 
 }
-
-//Ice* StudentWorld::getIce(int x, int y) const{
-//	iceContainer[x][y].get();
-//	return iceContainer[x][y].get;
-//}
 void StudentWorld::overlap() {
-	int playerX = getPlayer()->getX();
-	int playerY = getPlayer()->getY();
 
-	for (int x = playerX; playerX < x + 4; playerX++) {
-		for (int y = playerY; playerY < y + 4; playerY++) {
+	int playerX = player->getX();
+	int playerY = player->getY();
+
+	for (int x = playerX; x < playerX + 4; x++) {
+		for (int y = playerY; y < playerY + 4; y++) {
 			if (iceContainer[x][y] != nullptr) {
 				iceContainer[x][y].reset();
 				iceContainer[x][y] = nullptr;
+				GameController::getInstance().playSound(SOUND_DIG);
 			}
 		}
 	}
 }
 bool StudentWorld::iceInFront() {
-	switch (getPlayer()->getDirection()) {
+	switch (player->getDirection()) {
 	case GraphObject::Direction::left:
-		if (iceContainer[getPlayer()->getX() - 1][getPlayer()->getY()])
+		if (iceContainer[player->getX() - 1][player->getY()])
 			return true;
 		break;
 	case GraphObject::Direction::right:
-		if (iceContainer[getPlayer()->getX() + 4][getPlayer()->getY()])
+		if (iceContainer[player->getX() + 4][player->getY()])
 			return true;
 		break;
 	case GraphObject::Direction::down:
-		if (iceContainer[getPlayer()->getX()][getPlayer()->getY() - 1])
+		if (iceContainer[player->getX()][player->getY() - 1])
 			return true;
 		break;
 	case GraphObject::Direction::up:
-		if (iceContainer[getPlayer()->getX()][getPlayer()->getY() + 4])
+		if (iceContainer[player->getX()][player->getY() + 4])
 			return true;
 		break;
 	default:
@@ -87,16 +103,16 @@ bool StudentWorld::iceInFront() {
 	}
 }
 
-void StudentWorld::deleteIce(int x, int y){
-	 iceContainer[x][y].reset();
+void StudentWorld::deleteIce(int x, int y) {
+	iceContainer[x][y].reset();
 }
 ///////////////////ICEMAN/////////////////
 void StudentWorld::createPlayer() {
-	player = new Iceman(this);
+	player = std::unique_ptr<Iceman>(new Iceman(this));
 }
-Iceman* StudentWorld::getPlayer() const {
-	return player;
-}
+//Iceman* StudentWorld::getPlayer() const {
+//	return player;
+//}
 
 //not used yet
 StudentWorld* StudentWorld::getStudentWorld() {
