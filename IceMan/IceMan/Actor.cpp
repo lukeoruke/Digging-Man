@@ -97,7 +97,7 @@ void Iceman::doSomething() {
 			if (m_water_amnt > 0) {
 				GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);
 				m_water_amnt--;
-				if (!(getWorld()->iceInFront())) {
+				if (!(getWorld()->iceInFront(*this))) {
 					//TODO: Create Squirt Object (using players location and direction), then give it to StudentWorld to manage
 					setVisible(false); //for testing purposes only
 				}
