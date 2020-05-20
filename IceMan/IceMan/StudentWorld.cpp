@@ -15,22 +15,44 @@ GameWorld* createStudentWorld(string assetDir)
 
 
 
-
+//pg 19
 int StudentWorld::move() {
 	// This code is here merely to allow the game to build, run, and terminate after you hit enter a few times.
 	// Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
 
+	//updateDisplayText();
+
 	//player->overlap(std::move(iceContainer), player);
 
-	//pg 19
 	player->doSomething();
+	if (player->getIsAlive() == true) {
+		
+		if (player->getOil() < lvlOil()) {
+			//then do something for all actors in a for loop
 
-	//if (iceman is alive) {
-	//	if (he did not win) {
-	//		then do something for all actors in a for loop
-	//	}
-	//}
+			for (int i = 0; i < actors.size(); i++)
+			{
 
+
+			}
+			if (player->getIsAlive() == false)
+			{
+				//GameController::getInstance().playSound(SOUND_PLAYER_ANNOYED); //this might be done by the actor that annoying the player
+				decLives();
+				return GWSTATUS_PLAYER_DIED;
+			}
+				
+		}
+		else {
+			GameController::getInstance().playSound(SOUND_FINISHED_LEVEL);
+			return GWSTATUS_FINISHED_LEVEL;
+		}
+	}
+	else {
+		decLives();
+		return GWSTATUS_PLAYER_DIED;
+	}
+		
 	decLives();
 	//TEMP///
 	return GWSTATUS_CONTINUE_GAME;
@@ -65,6 +87,18 @@ void StudentWorld::createIce() {
 	}
 
 }
+
+int StudentWorld::lvlBoulder() {
+	return min(static_cast<int>(getLevel()) / 2 + 2, 9);
+}
+
+int StudentWorld::lvlGold() {
+	return max(5 - static_cast<int>(getLevel()) / 2, 2);
+}
+
+int StudentWorld::lvlOil() {
+	return min(2 + static_cast<int>(getLevel()), 21);
+}
 void StudentWorld::overlap() {
 
 	int playerX = player->getX();
@@ -73,38 +107,39 @@ void StudentWorld::overlap() {
 	for (int x = playerX; x < playerX + 4; x++) {
 		for (int y = playerY; y < playerY + 4; y++) {
 			if (iceContainer[x][y] != nullptr) {
-				iceContainer[x][y].reset();
-				iceContainer[x][y] = nullptr;
+				deleteIce(x, y);
 				GameController::getInstance().playSound(SOUND_DIG);
 			}
 		}
 	}
 }
-bool StudentWorld::iceInFront() {
-	switch (player->getDirection()) {
+bool StudentWorld::iceInFront(const Actor &a) {
+	switch (a.getDirection()) {
 	case GraphObject::Direction::left:
-		if (iceContainer[player->getX() - 1][player->getY()])
+		if (iceContainer[a.getX() - 1][a.getY()])
 			return true;
 		break;
 	case GraphObject::Direction::right:
-		if (iceContainer[player->getX() + 4][player->getY()])
+		if (iceContainer[a.getX() + 4][a.getY()])
 			return true;
 		break;
 	case GraphObject::Direction::down:
-		if (iceContainer[player->getX()][player->getY() - 1])
+		if (iceContainer[a.getX()][a.getY() - 1])
 			return true;
 		break;
 	case GraphObject::Direction::up:
-		if (iceContainer[player->getX()][player->getY() + 4])
+		if (iceContainer[a.getX()][a.getY() + 4])
 			return true;
 		break;
 	default:
 		return false;
 	}
+
 }
 
 void StudentWorld::deleteIce(int x, int y) {
 	iceContainer[x][y].reset();
+	iceContainer[x][y] = nullptr;
 }
 ///////////////////ICEMAN/////////////////
 void StudentWorld::createPlayer() {
