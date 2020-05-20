@@ -27,6 +27,7 @@ const int ICEMAN_START_Y = 60;
 Actor::Actor(StudentWorld* world, int imageID, int startX, int startY, Direction dir, double size, int depth)
 	:GraphObject(imageID, startX, startY, dir, size, depth)
 {
+	m_isAlive = true;
 	m_world = world;
 	setVisible(true);
 }
@@ -58,6 +59,7 @@ Iceman::Iceman(StudentWorld* world)
 	m_water_amnt = 5;
 	m_sonar_amnt = 1;
 	m_gold_amnt = 0;
+	m_oil_amnt = 0;
 }
 Iceman::~Iceman() {}
 
@@ -139,8 +141,11 @@ void Iceman::doSomething() {
 
 
 
-};
+}
 
+int Iceman::getOil() const {
+		return m_oil_amnt;
+}
 
 //class Boulder {
 //
