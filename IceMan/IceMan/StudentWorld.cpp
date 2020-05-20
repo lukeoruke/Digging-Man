@@ -114,21 +114,23 @@ void StudentWorld::overlap() {
 	}
 }
 bool StudentWorld::iceInFront(const Actor &a) {
+	int x = a.getX();
+	int y = a.getY();
 	switch (a.getDirection()) {
 	case GraphObject::Direction::left:
-		if (iceContainer[a.getX() - 1][a.getY()])
+		if (iceContainer[x - 1][y] || iceContainer[x - 1][y + 3])
 			return true;
 		break;
 	case GraphObject::Direction::right:
-		if (iceContainer[a.getX() + 4][a.getY()])
+		if (iceContainer[x + 4][y] || iceContainer[x + 4][y + 3])
 			return true;
 		break;
 	case GraphObject::Direction::down:
-		if (iceContainer[a.getX()][a.getY() - 1])
+		if (iceContainer[x][y - 1] || iceContainer[x + 3][y - 1])
 			return true;
 		break;
 	case GraphObject::Direction::up:
-		if (iceContainer[a.getX()][a.getY() + 4])
+		if (iceContainer[x][y + 4] || iceContainer[x + 3][y + 4])
 			return true;
 		break;
 	default:
