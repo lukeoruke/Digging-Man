@@ -30,7 +30,7 @@ int StudentWorld::move() {
 		if (player->getOil() < lvlOil()) {
 			//then do something for all actors in a for loop
 
-			for (int i = 0; i < actors.size(); i++)
+			for (int size_t = 0; i < actors.size(); i++)
 			{
 
 
@@ -134,7 +134,7 @@ bool StudentWorld::iceInFront(const Actor &a) {
 	default:
 		return false;
 	}
-
+	return false;
 }
 
 void StudentWorld::deleteIce(int x, int y) {
