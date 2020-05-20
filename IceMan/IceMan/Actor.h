@@ -10,10 +10,12 @@ class Actor : public GraphObject
 {
 	public:
 		Actor(StudentWorld* world,int imageID, int startX, int startY, Direction dir, double size, int depth);
-		StudentWorld* getWorld() const;
 		~Actor();
 		virtual void doSomething() = 0;
+		//setters
 		bool setisAlive(bool status);
+		//getters
+		StudentWorld* getWorld() const;
 		bool getisAlive();
 	private:
 		StudentWorld* m_world;
@@ -34,12 +36,17 @@ public:
 	Iceman(StudentWorld* world);
 	~Iceman();
 	virtual void doSomething();
+	//setters
+	
+	//getters
+	int getOil() const;
 	//bool overlap(std::unique_ptr<Ice> iceField[60][60], Iceman* player);
 private:
 	int m_HP;
 	int m_water_amnt;
 	int m_sonar_amnt;
 	int m_gold_amnt;
+	int m_oil_amnt;
 };
 
 //////////////////////// BOULDER //////////////////
@@ -50,6 +57,23 @@ private:
 //private:
 //};
 
+//+++++++ PROTESTORS +++++++
+class NormalProtestor : public Actor
+{
+public:
+
+private:
+
+};
+
+class HardcoreProtestor : public NormalProtestor
+{
+public:
+
+private:
+
+};
+//------ PROTESTORS ------
 
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
