@@ -38,7 +38,7 @@ public:
 	int lvlGold(); //returns amount of gold in current level
 	int lvlOil(); //returns amount of oil in current level
 	void overlap();
-	bool iceInFront();
+	bool iceInFront(const Actor& a);
 	void deleteIce(int x, int y);
 	
 	StudentWorld* getStudentWorld();
