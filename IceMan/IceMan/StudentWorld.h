@@ -23,8 +23,10 @@ public:
 	//function declrations
 	void createIce();
 	void createPlayer();
-	Iceman* getPlayer() const;
-	//Ice* getIce(int x, int y) const;
+	//void createBoulder();
+	//void createProtestor();
+	//void createHardcoreProtestor();
+	//std::unique_ptr<Iceman> getPlayer() const; 
 	void overlap();
 	bool iceInFront();
 	StudentWorld* getStudentWorld();
@@ -39,14 +41,14 @@ public:
 
 	virtual int move();
 
-	virtual void cleanUp()
-	{
-	}
+	virtual void cleanUp();
+	~StudentWorld();
 
 private:
 	Ice* ice;
-	std::unique_ptr<Ice> iceContainer[MAX_WINDOW][MAX_WINDOW-4];
-	Iceman* player;
+	std::unique_ptr<Ice> iceContainer[MAX_WINDOW][MAX_WINDOW];
+	/*Iceman* player;*/
+	std::unique_ptr<Iceman> player;
 	StudentWorld* world;
 };
 
