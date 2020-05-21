@@ -30,7 +30,7 @@ int StudentWorld::move() {
 		if (player->getOil() < lvlOil()) {
 			//then do something for all actors in a for loop
 
-			for (int size_t = 0; i < actors.size(); i++)
+			for (size_t i = 0; i < actors.size(); i++)
 			{
 
 
