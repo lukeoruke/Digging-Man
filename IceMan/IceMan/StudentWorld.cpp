@@ -103,10 +103,10 @@ int StudentWorld::lvlOil() {
 	return min(2 + static_cast<int>(getLevel()), 21);
 }
 
-void StudentWorld::overlap() {
+void StudentWorld::overlap(const Actor& a) {
 
-	int playerX = player->getX();
-	int playerY = player->getY();
+	int playerX = a.getX();
+	int playerY = a.getY();
 
 	for (int x = playerX; x < playerX + 4; x++) {
 		for (int y = playerY; y < playerY + 4; y++) {
@@ -199,11 +199,12 @@ void StudentWorld::createPlayer() {
 
 ///////////////////BOUDLER/////////////////
 void StudentWorld::createBoulder(int create) {
-	for (int x = 0; x < create+1; x++) {
-		int j = generateRandX();
-		int k = generateRandY();
-		boulder = std::unique_ptr<Boulder>(new Boulder(this,j,k));
-		iceContainer[j][k].reset();
+	for (int k = 0; k < create; k++) {
+		int x = generateRandX();
+		int y = generateRandY();
+		boulder = new Boulder(this,x,y);
+
+		overlap(*boulder);
 	}
 	
 }
