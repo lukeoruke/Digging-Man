@@ -72,7 +72,7 @@ void Iceman::doSomething() {
 		return;
 	}
 
-	getWorld()->overlap();
+	getWorld()->overlap(*this);
 
 	//pg30
 	int ch;
