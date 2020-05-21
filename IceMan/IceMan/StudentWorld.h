@@ -40,7 +40,7 @@ public:
 	int lvlBoulder(); //returns amount of boulders in current level
 	int lvlGold(); //returns amount of gold in current level
 	int lvlOil(); //returns amount of oil in current level
-	void overlap();
+	void overlap(const Actor& a);
 	bool overlapAt(int x, int y);
 	bool isRoomInFront(const Actor& a); //returns true if there is room for an object in front of player
 	bool iceInFront(const Actor& a);
@@ -55,7 +55,7 @@ public:
 	virtual int init() {
 		createIce();
 		createPlayer();
-		createBoulder(lvlBoulder());            //CAUSES ERROR
+		createBoulder(lvlBoulder());
 		return GWSTATUS_CONTINUE_GAME;
 	}
 
@@ -72,7 +72,7 @@ private:
 	std::unique_ptr<Ice> iceContainer[MAX_WINDOW][MAX_WINDOW];
 	std::unique_ptr<Iceman> player;
 	std::vector<Actor*> actors;
-	std::unique_ptr<Boulder> boulder;
+	Boulder* boulder;
 
 };
 
