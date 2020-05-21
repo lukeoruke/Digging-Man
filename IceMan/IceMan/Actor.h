@@ -6,41 +6,40 @@
 
 class StudentWorld;
 
-class Actor : public GraphObject
-{
-	public:
-		Actor(StudentWorld* world,int imageID, int startX, int startY, Direction dir, double size, int depth);
-		~Actor();
-		virtual void doSomething() = 0;
-		//setters
-		bool setisAlive(bool status);
-		//getters
-		StudentWorld* getWorld() const;
-		bool getisAlive();
-	private:
-		StudentWorld* m_world;
-		bool m_isAlive;
-};
 //////////////////////// ICE //////////////////
 class Ice : public GraphObject   //grpah object on pg 24
 {
 public:
 	Ice(int x, int y);
 	~Ice();
-	//virtual void doSomething();
 };
-//////////////////////// ICE MAN //////////////////
+
+//+++++++ ACTOR ++++++++
+class Actor : public GraphObject
+{
+public:
+	Actor(StudentWorld* world, int imageID, int startX, int startY, Direction dir, double size, int depth);
+	~Actor();
+	virtual void doSomething() = 0;
+	StudentWorld* getWorld() const;
+	void setIsAlive(bool status);
+	bool getIsAlive() const;
+private:
+	StudentWorld* m_world;
+	bool m_isAlive;
+};
+
+//++++++++ PERSON ++++++++
+
+//////////////////////// ICE MAN //////////////
 class Iceman : public Actor
 {
 public:
 	Iceman(StudentWorld* world);
-	~Iceman();
+	//~Iceman();
 	virtual void doSomething();
-	//setters
-	
-	//getters
 	int getOil() const;
-	//bool overlap(std::unique_ptr<Ice> iceField[60][60], Iceman* player);
+	//void overlap(std::unique_ptr<Ice> iceField[60][60], Iceman* player);
 private:
 	int m_HP;
 	int m_water_amnt;
@@ -48,14 +47,6 @@ private:
 	int m_gold_amnt;
 	int m_oil_amnt;
 };
-
-//////////////////////// BOULDER //////////////////
-//class Boulder : public Actor
-//{
-//public:
-//
-//private:
-//};
 
 //+++++++ PROTESTORS +++++++
 class NormalProtestor : public Actor
@@ -74,6 +65,7 @@ private:
 
 };
 //------ PROTESTORS ------
+
 
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
