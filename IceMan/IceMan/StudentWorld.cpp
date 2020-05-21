@@ -1,8 +1,9 @@
 #include "StudentWorld.h"
 #include "GameController.h"
 #include <string>
-using namespace std;
 #include <memory>
+#include <algorithm>
+using namespace std;
 
 const int TUNNEL_COL_START = 30;
 const int TUNNEL_COL_END = 33;
@@ -13,6 +14,17 @@ GameWorld* createStudentWorld(string assetDir)
 	return new StudentWorld(assetDir);
 }
 
+StudentWorld::~StudentWorld() {
+	cleanUp();
+}
+
+void StudentWorld::cleanUp() {
+	player.reset();
+
+
+}
+
+// Students:  Add code to this file (if you wish), StudentWorld.h, Actor.h and Actor.cpp
 
 
 //pg 19
@@ -60,32 +72,28 @@ int StudentWorld::move() {
 }
 
 
-// check if we have to use the respecitve Destructors aka  ~
-void StudentWorld::cleanUp() {
-	player.reset();
-	for (int row = 0; row < MAX_WINDOW; row++) {
-		for (int col = 0; col < MAX_WINDOW - 4; col++) {
-			if (row < TUNNEL_COL_START || row > TUNNEL_COL_END || col < TUNNEL_ROW) {
-				iceContainer[row][col].reset();
-			}
-		}
-	}
-
-}
-
-StudentWorld::~StudentWorld() {
-	cleanUp();
-}
-///////////////////ICE/////////////////
 void StudentWorld::createIce() {
 	for (int row = 0; row < MAX_WINDOW; row++) {
-		for (int col = 0; col < MAX_WINDOW-4; col++) {
+		for (int col = 0; col < MAX_WINDOW - 4; col++) {
 			if (row < TUNNEL_COL_START || row > TUNNEL_COL_END || col < TUNNEL_ROW) {
 				iceContainer[row][col] = std::unique_ptr<Ice>(new Ice(row, col));
 			}
 		}
 	}
 
+}
+
+void StudentWorld::createPlayer() {
+	player = make_unique<Iceman>(this);
+}
+
+//Ice* StudentWorld::getIce(int x, int y) {
+//	return iceContainer[x][y];
+//}
+
+StudentWorld* StudentWorld::getStudentWorld() //not used
+{
+	return this;
 }
 
 int StudentWorld::lvlBoulder() {
@@ -99,12 +107,12 @@ int StudentWorld::lvlGold() {
 int StudentWorld::lvlOil() {
 	return min(2 + static_cast<int>(getLevel()), 21);
 }
-void StudentWorld::overlap() {
 
+void StudentWorld::overlap() {
 	int playerX = player->getX();
 	int playerY = player->getY();
 
-	for (int x = playerX; x < playerX + 4; x++) {
+	for (int x = playerX; x < playerX + 4 ; x++) {
 		for (int y = playerY; y < playerY + 4; y++) {
 			if (iceContainer[x][y] != nullptr) {
 				deleteIce(x, y);
@@ -113,6 +121,54 @@ void StudentWorld::overlap() {
 		}
 	}
 }
+
+bool StudentWorld::overlapAt(int x, int y) {
+
+
+	for (int i = x; i < x + 4; i++) {
+		for (int j = y; j < y + 4; j++) {
+			if (iceContainer[i][j]) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool StudentWorld::isRoomInFront(const Actor& a) {
+	int x = a.getX();
+	int y = a.getY();
+	switch (a.getDirection()) {
+	case GraphObject::Direction::left:
+		if (!overlapAt(x - 4, y))
+			return true;
+		break;
+	case GraphObject::Direction::right:
+		if (!overlapAt(x + 4, y))
+			return true;
+		break;
+	case GraphObject::Direction::down:
+		if (!overlapAt(x, y - 4))
+			return true;
+		break;
+	case GraphObject::Direction::up:
+		if (!overlapAt(x, y + 4))
+			return true;
+		break;
+	default: 
+		return false;
+	}
+	return false;
+}
+
+
+//Iceman* StudentWorld::getPlayer() const {
+//	return player;
+//}
+
+ 
+
+
 bool StudentWorld::iceInFront(const Actor &a) {
 	int x = a.getX();
 	int y = a.getY();
@@ -138,22 +194,7 @@ bool StudentWorld::iceInFront(const Actor &a) {
 	}
 	return false;
 }
-
 void StudentWorld::deleteIce(int x, int y) {
 	iceContainer[x][y].reset();
 	iceContainer[x][y] = nullptr;
 }
-///////////////////ICEMAN/////////////////
-void StudentWorld::createPlayer() {
-	player = std::unique_ptr<Iceman>(new Iceman(this));
-}
-//Iceman* StudentWorld::getPlayer() const {
-//	return player;
-//}
-
-//not used yet
-StudentWorld* StudentWorld::getStudentWorld() {
-	return this;
-}
-
-
