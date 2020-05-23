@@ -13,12 +13,12 @@ const int ICEMAN_START_Y = 60;
 //   |      |
 //  ICE	   ACTOR	
 //           |
-// ______________________________________________________
-//         |	                 |                      |
-// BOULDER,SQUIRT(maybe)       PERSON                  GOODIES
-//                               |
-//                           ___________
-//                          |           |
+// _______________________________________________________________
+//         |	                 |                               |
+// BOULDER,SQUIRT(maybe)       PERSON                         GOODIES
+//                               |                               |
+//                           ___________                ____________________
+//                          |           |                
 //                       ICEMAN      Normal Protestor
 //                                           |
 //                                       HCPROTESTOR
@@ -45,6 +45,26 @@ bool Actor::getIsAlive() {
 	return m_isAlive;
 }
 
+void Actor::moveInDirection() {
+	
+	Direction d = this->getDirection();
+	switch (d) {
+
+		case GraphObject::Direction::left:
+			moveTo(getX() - 1, getY());
+			break;
+		case GraphObject::Direction::right:
+			moveTo(getX() + 1, getY());
+			break;
+		case GraphObject::Direction::down:
+			moveTo(getX(), getY() - 1);
+			break;
+		case GraphObject::Direction::up:
+			moveTo(getX(), getY() + 1);
+			break;
+	}
+	return;
+}
 
 //////////////////////// ICE //////////////////
 Ice::Ice(int row, int col) :GraphObject(IID_ICE, row, col, right, 0.25, 3) {
@@ -52,6 +72,31 @@ Ice::Ice(int row, int col) :GraphObject(IID_ICE, row, col, right, 0.25, 3) {
 }
 Ice::~Ice() {};
 //void Ice::doSomething(){};
+
+//////////////////////// Squirt ///////////////
+Squirt::Squirt(StudentWorld* world, int row, int col, GraphObject::Direction direction) 
+	: Actor(world, IID_WATER_SPURT, row, col, direction, 1.0, 0)
+{
+	m_travel_distance = 8;
+}
+
+void Squirt::doSomething() {
+	
+	if (m_travel_distance > 0 && !getWorld()->iceInFront(*this) && !getWorld()->boulderInFront(*this)) {
+		//TODO: should not be able to pass through boulders
+		moveInDirection();
+		m_travel_distance--;
+	}
+	else {
+		setisAlive(false);
+	}
+	return;
+}
+
+Squirt::~Squirt() {
+	setisAlive(false);
+	
+}
 
 //////////////////////// ICEMAN //////////////////     pg 27
 Iceman::Iceman(StudentWorld* world)
@@ -86,11 +131,10 @@ void Iceman::doSomething() {
 			if (m_water_amnt > 0) {
 				GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);
 				m_water_amnt--;
-				if (!(getWorld()->iceInFront(*this))) {  //if there is ice in front, don't fire the water
+				if (!(getWorld()->iceInFront(*this)) && !(getWorld()->boulderInFront(*this))) {  //if there is ice in front, don't fire the water. TODO: same logic but for boulder
 					if (getWorld()->isRoomInFront(*this))
 					{
-						setVisible(false); //for testing purposes only
-										   //TODO: Create Squirt Object (using players location and direction), then give it to StudentWorld to manage
+						getWorld()->createSquirt(*this);
 					}
 				}
 
@@ -99,25 +143,25 @@ void Iceman::doSomething() {
 		case KEY_PRESS_LEFT:  //x-1
 			if (getDirection() != left)
 				setDirection(left);
-			else if (getX() > 0)
+			else if (getX() > 0 && !(getWorld()->boulderInFront(*this)))
 				moveTo(getX() - 1, getY());
 			break;
 		case KEY_PRESS_RIGHT: //x+1
 			if (getDirection() != right)
 				setDirection(right);
-			else if (getX() < MAX_WINDOW - 4)
+			else if (getX() < MAX_WINDOW - 4 && !(getWorld()->boulderInFront(*this)))
 				moveTo(getX() + 1, getY());
 			break;
 		case KEY_PRESS_DOWN:  //y-1
 			if (getDirection() != down)
 				setDirection(down);
-			else if (getY() > 0)
+			else if (getY() > 0 && !(getWorld()->boulderInFront(*this)))
 				moveTo(getX(), getY() - 1);
 			break;
 		case KEY_PRESS_UP: //y+1
 			if (getDirection() != up)
 				setDirection(up);
-			else if (getY() < MAX_WINDOW - 4)
+			else if (getY() < MAX_WINDOW - 4 && !(getWorld()->boulderInFront(*this)))
 				moveTo(getX(), getY() + 1);
 			break;
 		case KEY_PRESS_TAB:
@@ -135,7 +179,27 @@ void Iceman::doSomething() {
 
 }
 
-int Iceman::getOil() const {
+int Iceman::getHP() const
+{
+	return m_HP;
+}
+
+int Iceman::getWaterAmnt() const
+{
+	return m_water_amnt;
+}
+
+int Iceman::getSonarAmnt() const
+{
+	return m_sonar_amnt;
+}
+
+int Iceman::getGoldAmnt() const
+{
+	return m_gold_amnt;
+}
+
+int Iceman::getOilAmnt() const {
 	return m_oil_amnt;
 }
 
@@ -143,7 +207,7 @@ int Iceman::getOil() const {
 Boulder::Boulder(StudentWorld* world, int x, int y)
 	:Actor(world, IID_BOULDER, x, y, down, 1.0, 1) {
 }
-Boulder::~Boulder(){}
+Boulder::~Boulder() {}
 
 void Boulder::doSomething() {
 
