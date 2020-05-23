@@ -28,10 +28,13 @@ public:
 	//destructor
 	~StudentWorld();
 
-	//function declrations
+	//function declarations
 	void createIce();
 	void createPlayer();
-	void createBoulder(int create);
+	void createSquirt(Iceman &man);
+	void createBoulder(int num);
+	void createOil(int num);
+	void createGold(int num);
 	//void createProtestor();
 	//void createHardcoreProtestor();
 	//std::unique_ptr<Iceman> getPlayer() const; 
@@ -40,22 +43,33 @@ public:
 	int lvlBoulder(); //returns amount of boulders in current level
 	int lvlGold(); //returns amount of gold in current level
 	int lvlOil(); //returns amount of oil in current level
+	
 	void overlap(const Actor& a);
 	bool overlapAt(int x, int y);
+
 	bool isRoomInFront(const Actor& a); //returns true if there is room for an object in front of player
 	bool iceInFront(const Actor& a);
-	void deleteIce(int x, int y);
+	bool boulderInFront(const Actor& a);
+
 	int generateRandX();
 	int generateRandY();
+	bool distance(int x, int y);
 
+	void deleteIce(int x, int y);
+	void removeDead();
+
+	void setDisplayText();
+	std::string formatStats(unsigned int level, unsigned int lives, int health, int squirts, int gold, int barrelsLeft, int sonar, int score);
 
 	StudentWorld* getStudentWorld();
 
-
+	//don't call these
 	virtual int init() {
 		createIce();
 		createPlayer();
 		createBoulder(lvlBoulder());
+		//createOil(lvlOil);
+		//createGold(lvlGold);
 		return GWSTATUS_CONTINUE_GAME;
 	}
 
@@ -67,12 +81,12 @@ public:
 private:
 	Ice* ice; //purpose?
 	StudentWorld* world; //purpose?
-						 //Iceman* player; //purpose?
+	//Iceman* player; //purpose?
 
 	std::unique_ptr<Ice> iceContainer[MAX_WINDOW][MAX_WINDOW];
 	std::unique_ptr<Iceman> player;
-	std::vector<Actor*> actors;
-	Boulder* boulder;
+	std::vector<std::unique_ptr<Actor>> actors;
+
 
 };
 
