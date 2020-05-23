@@ -1,9 +1,9 @@
 #include "StudentWorld.h"
 #include "GameController.h"
 #include <string>
-using namespace std;
 #include <memory>
 #include <algorithm>
+using namespace std;
 
 const int TUNNEL_COL_START = 30;
 const int TUNNEL_COL_END = 33;
@@ -85,6 +85,7 @@ void StudentWorld::cleanUp() {
 StudentWorld::~StudentWorld() {
 	cleanUp();
 }
+
 //not used yet
 StudentWorld* StudentWorld::getStudentWorld() {
 	return this;
@@ -101,6 +102,73 @@ void StudentWorld::createIce() {
 		}
 	}
 
+}
+
+///////////////////ICEMAN/////////////////
+void StudentWorld::createPlayer() {
+	player = std::unique_ptr<Iceman>(new Iceman(this));
+}
+
+///////////////////SQUIRT/////////////////
+void StudentWorld::createSquirt(Iceman &man) {
+	int x = man.getX();
+	int y = man.getY();
+	switch (man.getDirection()) {
+	case GraphObject::Direction::left:
+		x = x - 4;
+		break;
+	case GraphObject::Direction::right:
+		x = x + 4;
+		break;
+	case GraphObject::Direction::down:
+		y = y - 4;
+		break;
+	case GraphObject::Direction::up:
+		y = y + 4;
+		break;
+	}
+
+	actors.emplace_back(unique_ptr<Squirt>(new Squirt(this, x, y, man.getDirection())));
+}
+
+///////////////////BOUDLER/////////////////
+void StudentWorld::createBoulder(int create) {
+	for (int k = 0; k < create; k++) {
+		int x = 0;
+		int y = 0;
+		do {
+			do {
+				x = generateRandX();
+			} while (x > 26 && x < 34);
+
+			do {
+				y = generateRandY();
+			} while (y < 20);
+		
+
+		} while (!distance(x, y));
+
+		unique_ptr<Boulder> boulder;
+		boulder = unique_ptr<Boulder>(new Boulder(this, x, y));
+		overlap(*boulder);
+		actors.emplace_back(std::move(boulder));
+	}
+
+}
+
+void StudentWorld::createOil(int num)
+{
+	//TODO: create oil
+}
+
+void StudentWorld::createGold(int num)
+{
+	//TODO: create gold
+}
+
+
+int StudentWorld::lvlBoulder() {
+	return min(static_cast<int>(getLevel()) / 2 + 2, 9);
 }
 
 int StudentWorld::lvlGold() {
@@ -126,68 +194,7 @@ void StudentWorld::overlap(const Actor& a) {
 		}
 	}
 }
-bool StudentWorld::iceInFront(const Actor& a) {
-	int x = a.getX();
-	int y = a.getY();
-	switch (a.getDirection()) {
-	case GraphObject::Direction::left:
-		if (iceContainer[x - 1][y] || iceContainer[x - 1][y + 3])
-			return true;
-		break;
-	case GraphObject::Direction::right:
-		if (iceContainer[x + 4][y] || iceContainer[x + 4][y + 3])
-			return true;
-		break;
-	case GraphObject::Direction::down:
-		if (iceContainer[x][y - 1] || iceContainer[x + 3][y - 1])
-			return true;
-		break;
-	case GraphObject::Direction::up:
-		if (iceContainer[x][y + 4] || iceContainer[x + 3][y + 4])
-			return true;
-		break;
-	default:
-		return false;
-	}
-	return false;
-}
-bool StudentWorld::boulderInFront(const Actor& a)
-{
-	bool ans = false;
-	int xActor = a.getX();
-	int yActor = a.getY();
-	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
-	for (; it != actors.begin() + lvlBoulder(); ++it)
-	{	
-		int xBoulder = (*it)->getX();
-		int yBoulder = (*it)->getY();
-		switch (a.getDirection()) {
-		case GraphObject::Direction::left:
-			//if (iceContainer[x - 1][y] || iceContainer[x - 1][y + 3])
-			if ( ( xActor == xBoulder + 4 ) && ((yActor >= yBoulder - 3) && yActor <= yBoulder + 3) )
-				ans = true;
-			break;
-		case GraphObject::Direction::right:
-			//if (iceContainer[x + 4][y] || iceContainer[x + 4][y + 3])
-			if ((xActor == xBoulder - 4) && ((yActor >= yBoulder - 3) && yActor <= yBoulder + 3))
-				ans = true;
-			break;
-		case GraphObject::Direction::down:
-			//if (iceContainer[x][y - 1] || iceContainer[x + 3][y - 1])
-			if ((yActor == yBoulder + 4) && ((xActor >= xBoulder - 3) && xActor <= xBoulder + 3))
-				ans = true;
-			break;
-		case GraphObject::Direction::up:
-			//if (iceContainer[x][y + 4] || iceContainer[x + 3][y + 4])
-			if ((yActor == yBoulder - 4) && ((xActor >= xBoulder - 3) && xActor <= xBoulder + 3))
-				ans = true;
-			break;
-		default:
-			return false;
-		}
-	}
-	return ans;
-}
+
 bool StudentWorld::overlapAt(int x, int y) {
 
 
@@ -228,74 +235,101 @@ bool StudentWorld::isRoomInFront(const Actor& a) {
 	return ans;
 }
 
-
-
-void StudentWorld::deleteIce(int x, int y) {
-	iceContainer[x][y].reset();
-	iceContainer[x][y] = nullptr;
-}
-///////////////////ICEMAN/////////////////
-void StudentWorld::createPlayer() {
-	player = std::unique_ptr<Iceman>(new Iceman(this));
-}
-
-///////////////////SQUIRT/////////////////
-void StudentWorld::createSquirt(Iceman &man) {
-	int x = man.getX();
-	int y = man.getY();
-	switch (man.getDirection()) {
+bool StudentWorld::iceInFront(const Actor& a) {
+	int x = a.getX();
+	int y = a.getY();
+	switch (a.getDirection()) {
 	case GraphObject::Direction::left:
-		x = x - 4;
+		if (iceContainer[x - 1][y] || iceContainer[x - 1][y + 3])
+			return true;
 		break;
 	case GraphObject::Direction::right:
-		x = x + 4;
+		if (iceContainer[x + 4][y] || iceContainer[x + 4][y + 3])
+			return true;
 		break;
 	case GraphObject::Direction::down:
-		y = y - 4;
+		if (iceContainer[x][y - 1] || iceContainer[x + 3][y - 1])
+			return true;
 		break;
 	case GraphObject::Direction::up:
-		y = y + 4;
+		if (iceContainer[x][y + 4] || iceContainer[x + 3][y + 4])
+			return true;
 		break;
+	default:
+		return false;
 	}
-	actors.emplace_back(unique_ptr<Squirt>(new Squirt(this, x, y, man.getDirection())));
+	return false;
 }
 
-//Iceman* StudentWorld::getPlayer() const {
-//	return player;
-//}
-
-///////////////////BOUDLER/////////////////
-void StudentWorld::createBoulder(int create) {
-	for (int k = 0; k < create; k++) {
-		int x = 0;
-		int y = 0;
-		do {
-			do {
-				x = generateRandX();
-			} while (x > 26 && x < 34);
-
-			do {
-				y = generateRandY();
-			} while (y < 20);
-		
-
-		} while (!distance(x, y));
-
-		unique_ptr<Boulder> boulder;
-		boulder = unique_ptr<Boulder>(new Boulder(this, x, y));
-		overlap(*boulder);
-		actors.emplace_back(std::move(boulder));
+bool StudentWorld::boulderInFront(const Actor& a)
+{
+	bool ans = false;
+	int xActor = a.getX();
+	int yActor = a.getY();
+	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
+	for (; it != actors.begin() + lvlBoulder(); ++it)
+	{	
+		int xBoulder = (*it)->getX();
+		int yBoulder = (*it)->getY();
+		switch (a.getDirection()) {
+		case GraphObject::Direction::left:
+			if ( ( xActor == xBoulder + 4 ) && ((yActor >= yBoulder - 3) && yActor <= yBoulder + 3) )
+				ans = true;
+			break;
+		case GraphObject::Direction::right:
+			if ((xActor == xBoulder - 4) && ((yActor >= yBoulder - 3) && yActor <= yBoulder + 3))
+				ans = true;
+			break;
+		case GraphObject::Direction::down:
+			if ((yActor == yBoulder + 4) && ((xActor >= xBoulder - 3) && xActor <= xBoulder + 3))
+				ans = true;
+			break;
+		case GraphObject::Direction::up:
+			if ((yActor == yBoulder - 4) && ((xActor >= xBoulder - 3) && xActor <= xBoulder + 3))
+				ans = true;
+			break;
+		default:
+			return false;
+		}
 	}
-
+	return ans;
 }
 
-int StudentWorld::lvlBoulder() {
-	return min(static_cast<int>(getLevel()) / 2 + 2, 9);
+bool StudentWorld::boulderInTheWay(const Actor& a)
+{
+	bool ans = false;
+	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
+	for (; it != actors.begin() + lvlBoulder(); ++it)
+	{
+		int xSquirt = a.getX();
+		int ySquirt = a.getY();
+		int xBoulder = (*it)->getX();
+		int yBoulder = (*it)->getY();
+		switch (a.getDirection()) {
+		case GraphObject::Direction::left:
+			xSquirt = xSquirt - 4;
+			break;
+		case GraphObject::Direction::right:
+			xSquirt = xSquirt + 4;
+			break;
+		case GraphObject::Direction::down:
+			ySquirt = ySquirt - 4;
+			break;
+		case GraphObject::Direction::up:
+			ySquirt = ySquirt + 4;
+			break;
+		default:
+			return false;
+		}
+		if (radius(xSquirt, ySquirt, xBoulder, yBoulder) <= 3)
+			ans = true;
+	}
+
+	return ans;
 }
 
 int StudentWorld::generateRandX() {
 	return (rand() % 60);
-	
 }
 
 int StudentWorld::generateRandY() {
@@ -315,6 +349,17 @@ bool StudentWorld::distance(int x, int y) {
 	}
 	return true;
 }
+
+double StudentWorld::radius(int x1, int y1, int x2, int y2) {
+	double d = (sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2)));
+	return d;
+}
+
+void StudentWorld::deleteIce(int x, int y) {
+	iceContainer[x][y].reset();
+	iceContainer[x][y] = nullptr;
+}
+
 
 void StudentWorld::removeDead() {
 	if (actors.size() == 0)
