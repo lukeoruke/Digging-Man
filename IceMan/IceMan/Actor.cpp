@@ -131,13 +131,10 @@ void Iceman::doSomething() {
 			if (m_water_amnt > 0) {
 				GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);
 				m_water_amnt--;
-				if (!(getWorld()->iceInFront(*this)) && !(getWorld()->boulderInFront(*this))) {  //if there is ice in front, don't fire the water. TODO: same logic but for boulder
-					if (getWorld()->isRoomInFront(*this))
-					{
-						getWorld()->createSquirt(*this);
-					}
+				if (getWorld()->isRoomInFront(*this) && !getWorld()->boulderInTheWay(*this))
+				{
+					getWorld()->createSquirt(*this);
 				}
-
 			}
 			break;
 		case KEY_PRESS_LEFT:  //x-1
@@ -206,9 +203,14 @@ int Iceman::getOilAmnt() const {
 //////////////////////// BOULDER //////////////////   
 Boulder::Boulder(StudentWorld* world, int x, int y)
 	:Actor(world, IID_BOULDER, x, y, down, 1.0, 1) {
+	m_state = stable;
 }
 Boulder::~Boulder() {}
 
 void Boulder::doSomething() {
 
+}
+
+Boulder::State Boulder::getState() const {
+	return m_state;
 }
