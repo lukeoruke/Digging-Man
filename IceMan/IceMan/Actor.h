@@ -69,11 +69,17 @@ private:
 class Boulder : public Actor
 {
 public:
+	enum State {stable, waiting, falling};
+
 	Boulder(StudentWorld* world, int x, int y);
 	~Boulder();
 	virtual void doSomething();
 
+	//getters
+	State getState() const;
+
 private:
+	State m_state;
 
 };
 
