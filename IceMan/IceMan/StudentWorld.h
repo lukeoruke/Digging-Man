@@ -50,11 +50,12 @@ public:
 	bool isRoomInFront(const Actor& a); //returns true if there is room for an object in front of player
 	bool iceInFront(const Actor& a);
 	bool boulderInFront(const Actor& a);
+	bool boulderInTheWay(const Actor& a);
 
 	int generateRandX();
 	int generateRandY();
 	bool distance(int x, int y);
-
+	double radius(int x1, int y1, int x2, int y2);
 	void deleteIce(int x, int y);
 	void removeDead();
 
