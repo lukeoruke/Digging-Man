@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <algorithm>
+#include <vector>
 using namespace std;
 
 const int TUNNEL_COL_START = 30;
@@ -89,6 +90,21 @@ StudentWorld* StudentWorld::getStudentWorld() {
 	return this;
 }
 
+int StudentWorld::getBouldersLeft() const
+{
+	return m_bouldersLeft;
+}
+
+void StudentWorld::decBouldersLeft()
+{
+	m_bouldersLeft--;
+}
+
+void StudentWorld::incBouldersLeft()
+{
+	m_bouldersLeft++;
+}
+
 
 ///////////////////ICE/////////////////
 void StudentWorld::createIce() {
@@ -108,7 +124,7 @@ void StudentWorld::createPlayer() {
 }
 
 ///////////////////SQUIRT/////////////////
-void StudentWorld::createSquirt(Iceman &man) {
+void StudentWorld::createSquirt(Iceman& man) {
 	int x = man.getX();
 	int y = man.getY();
 	switch (man.getDirection()) {
@@ -250,14 +266,15 @@ bool StudentWorld::iceInFront(const Actor& a) {
 }
 
 // parses through actor vector and finds boulders
-bool StudentWorld::boulderInFront(const Actor& a)  
+bool StudentWorld::boulderInFront(const Actor& a)
 {
 	bool ans = false;
 	int xActor = a.getX();
 	int yActor = a.getY();
 	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
-	for (; it != actors.begin() + lvlBoulder(); ++it)
+	for (; it != actors.begin() + getBouldersLeft(); ++it)
 	{
+		
 		int xBoulder = (*it)->getX();
 		int yBoulder = (*it)->getY();
 		switch (a.getDirection()) {
@@ -357,19 +374,24 @@ void StudentWorld::removeDead() {
 	if (actors.size() == 0)
 		return;
 
+	//THIS SHIT IS WRONG
+	//for (; it != actors.end(); it++)
+	//{
+	//	if ((*it) != nullptr) {
+
+	//		if (!(*it)->getIsAlive())
+	//		{
+	//			//(*it).reset();
+	//			//
+	//			//*it == nullptr;     //NECESSRY?
+
+	//		}
+	//	}
+	//}
 	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
-	for (; it != actors.end(); it++)
-	{
-		if ((*it) != nullptr) {
-
-			if (!(*it)->getIsAlive())
-			{
-				(*it).reset();
-				*it == nullptr;     //NECESSRY?
-
-			}
-		}
-	}
+	actors.erase(std::remove_if(it, actors.end(), [&](unique_ptr<Actor> &upAct)-> bool
+		{return (upAct->getIsAlive() == false); }),
+		actors.end());
 
 	return;
 }
@@ -388,17 +410,17 @@ int StudentWorld::lvlOil() {
 
 //pg 22
 string StudentWorld::formatStats(unsigned int level, unsigned int lives, int health, int squirts, int gold, int barrelsLeft, int sonar, int score)
-{	
-	string s_level = "Lvl: "+to_string(level)+"  ";
-	string s_lives = "Lives: "+to_string(lives)+"  ";
-	string s_health = "Hlth:  "+to_string(health)+"%  ";
-	string s_squirt = "Wtr:  "+to_string(squirts)+"  ";
-	string s_gold = "Gld:  "+to_string(gold)+"  ";
-	string s_barrel= "Oil Left:  "+ to_string(barrelsLeft)+ "  ";
-	string s_sonar = "Sonar:  "+to_string(sonar)+ "  ";
-	string s_score = "Scr:  "+to_string(score);         //MAKE THIS DISPLAY 6 DIGITS
+{
+	string s_level = "Lvl: " + to_string(level) + "  ";
+	string s_lives = "Lives: " + to_string(lives) + "  ";
+	string s_health = "Hlth:  " + to_string(health) + "%  ";
+	string s_squirt = "Wtr:  " + to_string(squirts) + "  ";
+	string s_gold = "Gld:  " + to_string(gold) + "  ";
+	string s_barrel = "Oil Left:  " + to_string(barrelsLeft) + "  ";
+	string s_sonar = "Sonar:  " + to_string(sonar) + "  ";
+	string s_score = "Scr:  " + to_string(score);         //MAKE THIS DISPLAY 6 DIGITS
 
-	string display = s_level + s_lives+s_health + s_squirt + s_gold + s_barrel + s_sonar + s_score;
+	string display = s_level + s_lives + s_health + s_squirt + s_gold + s_barrel + s_sonar + s_score;
 	return display;
 }
 
