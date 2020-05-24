@@ -43,7 +43,7 @@ public:
 	int lvlBoulder(); //returns amount of boulders in current level
 	int lvlGold(); //returns amount of gold in current level
 	int lvlOil(); //returns amount of oil in current level
-	
+
 	void overlap(const Actor& a);
 	bool overlapAt(int x, int y);
 
@@ -58,6 +58,7 @@ public:
 	double radius(int x1, int y1, int x2, int y2);
 	void deleteIce(int x, int y);
 	void removeDead();
+
 
 	void setDisplayText();
 	std::string formatStats(unsigned int level, unsigned int lives, int health, int squirts, int gold, int barrelsLeft, int sonar, int score);
@@ -82,8 +83,6 @@ public:
 private:
 	Ice* ice; //purpose?
 	StudentWorld* world; //purpose?
-	//Iceman* player; //purpose?
-
 	std::unique_ptr<Ice> iceContainer[MAX_WINDOW][MAX_WINDOW];
 	std::unique_ptr<Iceman> player;
 	std::vector<std::unique_ptr<Actor>> actors;
