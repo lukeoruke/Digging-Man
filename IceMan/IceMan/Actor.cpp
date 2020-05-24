@@ -46,22 +46,22 @@ bool Actor::getIsAlive() {
 }
 
 void Actor::moveInDirection() {
-	
+
 	Direction d = this->getDirection();
 	switch (d) {
 
-		case GraphObject::Direction::left:
-			moveTo(getX() - 1, getY());
-			break;
-		case GraphObject::Direction::right:
-			moveTo(getX() + 1, getY());
-			break;
-		case GraphObject::Direction::down:
-			moveTo(getX(), getY() - 1);
-			break;
-		case GraphObject::Direction::up:
-			moveTo(getX(), getY() + 1);
-			break;
+	case GraphObject::Direction::left:
+		moveTo(getX() - 1, getY());
+		break;
+	case GraphObject::Direction::right:
+		moveTo(getX() + 1, getY());
+		break;
+	case GraphObject::Direction::down:
+		moveTo(getX(), getY() - 1);
+		break;
+	case GraphObject::Direction::up:
+		moveTo(getX(), getY() + 1);
+		break;
 	}
 	return;
 }
@@ -74,14 +74,14 @@ Ice::~Ice() {};
 //void Ice::doSomething(){};
 
 //////////////////////// Squirt ///////////////
-Squirt::Squirt(StudentWorld* world, int row, int col, GraphObject::Direction direction) 
+Squirt::Squirt(StudentWorld* world, int row, int col, GraphObject::Direction direction)
 	: Actor(world, IID_WATER_SPURT, row, col, direction, 1.0, 0)
 {
 	m_travel_distance = 8;
 }
 
 void Squirt::doSomething() {
-	
+
 	if (m_travel_distance > 0 && !getWorld()->iceInFront(*this) && !getWorld()->boulderInFront(*this)) {
 		//TODO: should not be able to pass through boulders
 		moveInDirection();
@@ -95,7 +95,7 @@ void Squirt::doSomething() {
 
 Squirt::~Squirt() {
 	setisAlive(false);
-	
+
 }
 
 //////////////////////// ICEMAN //////////////////     pg 27
@@ -131,10 +131,13 @@ void Iceman::doSomething() {
 			if (m_water_amnt > 0) {
 				GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);
 				m_water_amnt--;
-				if (getWorld()->isRoomInFront(*this) && !getWorld()->boulderInTheWay(*this))
-				{
-					getWorld()->createSquirt(*this);
+				if (!(getWorld()->iceInFront(*this)) && !(getWorld()->boulderInFront(*this))) {  //if there is ice in front, don't fire the water. TODO: same logic but for boulder
+					if (getWorld()->isRoomInFront(*this))
+					{
+						getWorld()->createSquirt(*this);
+					}
 				}
+
 			}
 			break;
 		case KEY_PRESS_LEFT:  //x-1
@@ -200,17 +203,61 @@ int Iceman::getOilAmnt() const {
 	return m_oil_amnt;
 }
 
-//////////////////////// BOULDER //////////////////   
+//////////////////////// BOULDER //////////////////   pg31
 Boulder::Boulder(StudentWorld* world, int x, int y)
 	:Actor(world, IID_BOULDER, x, y, down, 1.0, 1) {
 	m_state = stable;
+	m_tick = 29;
 }
 Boulder::~Boulder() {}
 
-void Boulder::doSomething() {
-
+void Boulder::setState(state x) {
+	m_state = x;
 }
-
-Boulder::State Boulder::getState() const {
+Boulder:: state Boulder::getState() const {
 	return m_state;
+}
+void Boulder::decrementTick() {
+	m_tick--;
+}
+int Boulder::getTick() {
+	return m_tick;
+}
+void Boulder::doSomething() {
+	if (!this->getIsAlive()) { //if they are not alive
+		return;
+	}
+	
+	switch(this->getState()) {
+		case Boulder::state::stable:
+			//if there exists ice underneath the boulder, stay stable
+			//if not change the state to waiting
+			if (!getWorld()->iceInFront(*this)) { //if there is no ice underneath
+				m_state = waiting;
+			}
+			//check if there is any ince in the 4 squares below it    pg 32
+			break;
+		case Boulder::state::waiting:
+			if (m_tick == 0) {  // once 30 ticks have passed, change the state of the boudler to falling
+				m_state = falling;
+				GameController::getInstance().playSound(SOUND_FALLING_ROCK);
+
+			}
+			else {
+				decrementTick();
+			}
+			break;
+		case Boulder::state::falling:
+				this->moveInDirection();
+				//check after one tick whether there is ice, boulder, or out of border
+				if (getWorld()->iceInFront(*this) || getWorld()->boulderInFront(*this)
+					||getY() == 0)
+				{ 
+					this->setisAlive(false);
+				}
+
+			break;
+	}
+
+
 }
