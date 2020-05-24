@@ -24,6 +24,7 @@ public:
 		: GameWorld(assetDir)
 	{
 		player = nullptr;
+		m_bouldersLeft = 0;
 	}
 	//destructor
 	~StudentWorld();
@@ -31,7 +32,7 @@ public:
 	//function declarations
 	void createIce();
 	void createPlayer();
-	void createSquirt(Iceman &man);
+	void createSquirt(Iceman& man);
 	void createBoulder(int num);
 	void createOil(int num);
 	void createGold(int num);
@@ -63,7 +64,13 @@ public:
 	void setDisplayText();
 	std::string formatStats(unsigned int level, unsigned int lives, int health, int squirts, int gold, int barrelsLeft, int sonar, int score);
 
+	//getters
 	StudentWorld* getStudentWorld();
+	int getBouldersLeft() const;
+
+	//setters
+	void decBouldersLeft();
+	void incBouldersLeft();
 
 	//don't call these
 	virtual int init() {
@@ -81,12 +88,12 @@ public:
 
 
 private:
-	Ice* ice; //purpose?
-	StudentWorld* world; //purpose?
+	//Ice* ice; //purpose?
+	//StudentWorld* world; //purpose?
 	std::unique_ptr<Ice> iceContainer[MAX_WINDOW][MAX_WINDOW];
 	std::unique_ptr<Iceman> player;
 	std::vector<std::unique_ptr<Actor>> actors;
-
+	int m_bouldersLeft;
 
 };
 
