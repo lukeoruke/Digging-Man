@@ -72,9 +72,9 @@ public:
 	Boulder(StudentWorld* world, int x, int y);
 	~Boulder();
 	virtual void doSomething();
-	enum state{stable, waiting, falling};
+	enum state { stable, waiting, falling };
 	void setState(state x);
-	state getState() const ;
+	state getState() const;
 	void decrementTick();
 	int getTick();
 
