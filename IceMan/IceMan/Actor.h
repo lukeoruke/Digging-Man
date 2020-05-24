@@ -60,7 +60,7 @@ public:
 	Squirt(StudentWorld* world, int row, int col, Direction direction);
 	~Squirt();
 	virtual void doSomething();
-	
+
 private:
 	int m_travel_distance;
 };
@@ -69,18 +69,18 @@ private:
 class Boulder : public Actor
 {
 public:
-	enum State {stable, waiting, falling};
-
 	Boulder(StudentWorld* world, int x, int y);
 	~Boulder();
 	virtual void doSomething();
-
-	//getters
-	State getState() const;
+	enum state{stable, waiting, falling};
+	void setState(state x);
+	state getState() const ;
+	void decrementTick();
+	int getTick();
 
 private:
-	State m_state;
-
+	state m_state;
+	int m_tick;
 };
 
 //+++++++ PROTESTORS +++++++
