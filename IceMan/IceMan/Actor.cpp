@@ -131,7 +131,7 @@ void Iceman::doSomething() {
 			if (m_water_amnt > 0) {
 				GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);
 				m_water_amnt--;
-				if (!(getWorld()->iceInFront(*this)) && !(getWorld()->boulderInFront(*this))) {  //if there is ice in front, don't fire the water. TODO: same logic but for boulder
+				if (!(getWorld()->iceInFront(*this))/* && !(/getWorld()->boulderInFront(*this))*/) {  //if there is ice in front, don't fire the water. TODO: same logic but for boulder
 					if (getWorld()->isRoomInFront(*this))
 					{
 						getWorld()->createSquirt(*this);
@@ -208,13 +208,16 @@ Boulder::Boulder(StudentWorld* world, int x, int y)
 	:Actor(world, IID_BOULDER, x, y, down, 1.0, 1) {
 	m_state = stable;
 	m_tick = 29;
+	getWorld()->incBouldersLeft();
 }
-Boulder::~Boulder() {}
+Boulder::~Boulder() {
+	getWorld()->decBouldersLeft();
+}
 
 void Boulder::setState(state x) {
 	m_state = x;
 }
-Boulder:: state Boulder::getState() const {
+Boulder::state Boulder::getState() const {
 	return m_state;
 }
 void Boulder::decrementTick() {
@@ -227,36 +230,36 @@ void Boulder::doSomething() {
 	if (!this->getIsAlive()) { //if they are not alive
 		return;
 	}
-	
-	switch(this->getState()) {
-		case Boulder::state::stable:
-			//if there exists ice underneath the boulder, stay stable
-			//if not change the state to waiting
-			if (!getWorld()->iceInFront(*this)) { //if there is no ice underneath
-				m_state = waiting;
-			}
-			//check if there is any ince in the 4 squares below it    pg 32
-			break;
-		case Boulder::state::waiting:
-			if (m_tick == 0) {  // once 30 ticks have passed, change the state of the boudler to falling
-				m_state = falling;
-				GameController::getInstance().playSound(SOUND_FALLING_ROCK);
 
-			}
-			else {
-				decrementTick();
-			}
-			break;
-		case Boulder::state::falling:
-				this->moveInDirection();
-				//check after one tick whether there is ice, boulder, or out of border
-				if (getWorld()->iceInFront(*this) || getWorld()->boulderInFront(*this)
-					||getY() == 0)
-				{ 
-					this->setisAlive(false);
-				}
+	switch (this->getState()) {
+	case Boulder::state::stable:
+		//if there exists ice underneath the boulder, stay stable
+		//if not change the state to waiting
+		if (!getWorld()->iceInFront(*this)) { //if there is no ice underneath
+			m_state = waiting;
+		}
+		//check if there is any ince in the 4 squares below it    pg 32
+		break;
+	case Boulder::state::waiting:
+		if (m_tick == 0) {  // once 30 ticks have passed, change the state of the boudler to falling
+			m_state = falling;
+			GameController::getInstance().playSound(SOUND_FALLING_ROCK);
 
-			break;
+		}
+		else {
+			decrementTick();
+		}
+		break;
+	case Boulder::state::falling:
+		this->moveInDirection();
+		//check after one tick whether there is ice, boulder, or out of border
+		if (getWorld()->iceInFront(*this) || getWorld()->boulderInFront(*this)
+			|| getY() == 0)
+		{
+			this->setisAlive(false);
+		}
+
+		break;
 	}
 
 
