@@ -21,15 +21,13 @@ int StudentWorld::move() {
 	// This code is here merely to allow the game to build, run, and terminate after you hit enter a few times.
 	// Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
 
-	//updateDisplayText();
-
-	//player->overlap(std::move(iceContainer), player);
-
+	setDisplayText();
 	player->doSomething();
+
 	if (player->getIsAlive()) {
 
 		if (player->getOilAmnt() < lvlOil()) {   //checks if player got the oil amnt
-			//then do something for all actors in a for loop
+												 //then do something for all actors in a for loop
 
 			for (size_t i = 0; i < actors.size(); i++)  //go thorough the actor vector and trigger its do something
 			{
@@ -51,12 +49,12 @@ int StudentWorld::move() {
 		}
 		removeDead();
 	}
-	
+
 	else {
 		decLives();
 		return GWSTATUS_PLAYER_DIED;
 	}
-	
+
 	//decLives();
 	//TEMP///
 	return GWSTATUS_CONTINUE_GAME;
@@ -144,7 +142,7 @@ void StudentWorld::createBoulder(int create) {
 			do {
 				y = generateRandY();
 			} while (y < 20);
-		
+
 
 		} while (!distance(x, y));
 
@@ -166,18 +164,6 @@ void StudentWorld::createGold(int num)
 	//TODO: create gold
 }
 
-
-int StudentWorld::lvlBoulder() {
-	return min(static_cast<int>(getLevel()) / 2 + 2, 9);
-}
-
-int StudentWorld::lvlGold() {
-	return max(5 - static_cast<int>(getLevel()) / 2, 2);
-}
-
-int StudentWorld::lvlOil() {
-	return min(2 + static_cast<int>(getLevel()), 21);
-}
 
 void StudentWorld::overlap(const Actor& a) {
 
@@ -235,6 +221,8 @@ bool StudentWorld::isRoomInFront(const Actor& a) {
 	return ans;
 }
 
+
+//checks whether the pixel around it is a ice block
 bool StudentWorld::iceInFront(const Actor& a) {
 	int x = a.getX();
 	int y = a.getY();
@@ -261,19 +249,20 @@ bool StudentWorld::iceInFront(const Actor& a) {
 	return false;
 }
 
-bool StudentWorld::boulderInFront(const Actor& a)
+// parses through actor vector and finds boulders
+bool StudentWorld::boulderInFront(const Actor& a)  
 {
 	bool ans = false;
 	int xActor = a.getX();
 	int yActor = a.getY();
 	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
 	for (; it != actors.begin() + lvlBoulder(); ++it)
-	{	
+	{
 		int xBoulder = (*it)->getX();
 		int yBoulder = (*it)->getY();
 		switch (a.getDirection()) {
 		case GraphObject::Direction::left:
-			if ( ( xActor == xBoulder + 4 ) && ((yActor >= yBoulder - 3) && yActor <= yBoulder + 3) )
+			if ((xActor == xBoulder + 4) && ((yActor >= yBoulder - 3) && yActor <= yBoulder + 3))
 				ans = true;
 			break;
 		case GraphObject::Direction::right:
@@ -328,10 +317,12 @@ bool StudentWorld::boulderInTheWay(const Actor& a)
 	return ans;
 }
 
+
+//generates a random x value
 int StudentWorld::generateRandX() {
 	return (rand() % 60);
 }
-
+//generates a random y value
 int StudentWorld::generateRandY() {
 	return (rand() % 56);
 }
@@ -355,6 +346,7 @@ double StudentWorld::radius(int x1, int y1, int x2, int y2) {
 	return d;
 }
 
+//deletes ice block of a specified cooridnate
 void StudentWorld::deleteIce(int x, int y) {
 	iceContainer[x][y].reset();
 	iceContainer[x][y] = nullptr;
@@ -364,7 +356,7 @@ void StudentWorld::deleteIce(int x, int y) {
 void StudentWorld::removeDead() {
 	if (actors.size() == 0)
 		return;
-	
+
 	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
 	for (; it != actors.end(); it++)
 	{
@@ -373,11 +365,41 @@ void StudentWorld::removeDead() {
 			if (!(*it)->getIsAlive())
 			{
 				(*it).reset();
+				*it == nullptr;     //NECESSRY?
 
 			}
 		}
 	}
+
 	return;
+}
+
+int StudentWorld::lvlBoulder() {
+	return min(static_cast<int>(getLevel()) / 2 + 2, 9);
+}
+
+int StudentWorld::lvlGold() {
+	return max(5 - static_cast<int>(getLevel()) / 2, 2);
+}
+
+int StudentWorld::lvlOil() {
+	return min(2 + static_cast<int>(getLevel()), 21);
+}
+
+//pg 22
+string StudentWorld::formatStats(unsigned int level, unsigned int lives, int health, int squirts, int gold, int barrelsLeft, int sonar, int score)
+{	
+	string s_level = "Lvl: "+to_string(level)+"  ";
+	string s_lives = "Lives: "+to_string(lives)+"  ";
+	string s_health = "Hlth:  "+to_string(health)+"%  ";
+	string s_squirt = "Wtr:  "+to_string(squirts)+"  ";
+	string s_gold = "Gld:  "+to_string(gold)+"  ";
+	string s_barrel= "Oil Left:  "+ to_string(barrelsLeft)+ "  ";
+	string s_sonar = "Sonar:  "+to_string(sonar)+ "  ";
+	string s_score = "Scr:  "+to_string(score);         //MAKE THIS DISPLAY 6 DIGITS
+
+	string display = s_level + s_lives+s_health + s_squirt + s_gold + s_barrel + s_sonar + s_score;
+	return display;
 }
 
 void StudentWorld::setDisplayText() {
@@ -394,10 +416,4 @@ void StudentWorld::setDisplayText() {
 	string s = formatStats(level, lives, health, squirts, gold, barrelsLeft, sonar, score);
 	// Finally, update the display text at the top of the screen with your newly created stats 
 	setGameStatText(s); // calls our provided GameWorld::setGameStatText
-}
-
-string StudentWorld::formatStats(unsigned int level, unsigned int lives, int health, int squirts, int gold, int barrelsLeft, int sonar, int score)
-{
-	//TODO:: format
-	return string();
 }
