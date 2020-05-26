@@ -57,8 +57,8 @@ public:
 
 	int generateRandX();
 	int generateRandY();
-	bool distance(int x, int y); //returns true is distance between actors is far enough
-	double radius(int x1, int y1, int x2, int y2);
+	bool distance(int x, int y); //(for creating new actor objects) returns true if euclidean distance between calling actor and a coordinate pair is greater than 6
+	double radius(int x1, int y1, int x2, int y2); //takes two sets of coordinates and returns the euclidean distance between them
 	void deleteIce(int x, int y);
 	void removeDead();
 
