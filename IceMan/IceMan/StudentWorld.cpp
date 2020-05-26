@@ -354,39 +354,39 @@ void StudentWorld::incBouldersLeft()
 	m_bouldersLeft++;
 }
 
-//is this used?
-//bool StudentWorld::boulderInTheWay(const Actor& a)
-//{
-//	bool ans = false;
-//	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
-//	for (; it != actors.begin() + lvlBoulder(); ++it)
-//	{
-//		int xSquirt = a.getX();
-//		int ySquirt = a.getY();
-//		int xBoulder = (*it)->getX();
-//		int yBoulder = (*it)->getY();
-//		switch (a.getDirection()) {
-//		case GraphObject::Direction::left:
-//			xSquirt = xSquirt - 4;
-//			break;
-//		case GraphObject::Direction::right:
-//			xSquirt = xSquirt + 4;
-//			break;
-//		case GraphObject::Direction::down:
-//			ySquirt = ySquirt - 4;
-//			break;
-//		case GraphObject::Direction::up:
-//			ySquirt = ySquirt + 4;
-//			break;
-//		default:
-//			return false;
-//		}
-//		if (radius(xSquirt, ySquirt, xBoulder, yBoulder) <= 3)
-//			ans = true;
-//	}
-//
-//	return ans;
-//}
+//is this used? now it is lol
+bool StudentWorld::boulderInTheWay(const Actor& a)
+{
+	bool ans = false;
+	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
+	for (; it != actors.begin() + getBouldersLeft(); ++it)
+	{
+		int xActor = a.getX();
+		int yActor = a.getY();
+		int xBoulder = (*it)->getX();
+		int yBoulder = (*it)->getY();
+		switch (a.getDirection()) {
+		case GraphObject::Direction::left:
+			xActor = xActor - 1;
+			break;
+		case GraphObject::Direction::right:
+			xActor = xActor + 1;
+			break;
+		case GraphObject::Direction::down:
+			yActor = yActor - 1;
+			break;
+		case GraphObject::Direction::up:
+			yActor = yActor + 1;
+			break;
+		default:
+			return false;
+		}
+		if (radius(xActor, yActor, xBoulder, yBoulder) <= 3)
+			ans = true;
+	}
+
+	return ans;
+}
 
 
 
