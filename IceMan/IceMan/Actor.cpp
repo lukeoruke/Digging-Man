@@ -82,7 +82,7 @@ Ice::~Ice() {};
 Squirt::Squirt(StudentWorld* world, int row, int col, GraphObject::Direction direction)
 	: Actor(world, IID_WATER_SPURT, row, col, direction, 1.0, 0)
 {
-	m_travel_distance = 8;
+	m_travel_distance = 4;
 }
 
 void Squirt::doSomething() {
