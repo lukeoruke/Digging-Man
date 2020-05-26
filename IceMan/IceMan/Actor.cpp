@@ -17,11 +17,10 @@ const int ICEMAN_START_Y = 60;
 //         |	                 |                               |
 // BOULDER,SQUIRT(maybe)       PERSON                         GOODIES
 //                               |                               |
-//                           ___________                ____________________
-//                          |           |                
-//                       ICEMAN      Normal Protestor
-//                                           |
-//                                       HCPROTESTOR
+//                     ______________________           ____________________
+//                    |           |          |      
+//                 ICEMAN      N. Prot.   HC. PROT.
+//                                                                            
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////ACTOR//////////////////////////////////////////////////
@@ -139,7 +138,7 @@ void Iceman::doSomething() {
 			if (m_water_amnt > 0) {
 				GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);
 				m_water_amnt--;
-				if (!(getWorld()->iceInFront(*this))/* && !(/getWorld()->boulderInFront(*this))*/) {  //if there is ice in front, don't fire the water. TODO: same logic but for boulder
+				if (!(getWorld()->iceInFront(*this)) && !(getWorld()->boulderInTheWay(*this))) {  //if there is ice in front, don't fire the water. same logic but for boulder
 					if (getWorld()->isRoomInFront(*this))
 					{
 						getWorld()->createSquirt(*this);
@@ -151,31 +150,31 @@ void Iceman::doSomething() {
 		case KEY_PRESS_LEFT:  //x-1
 			if (getDirection() != left)
 				setDirection(left);
-			else if (getX() > 0 && !(getWorld()->boulderInFront(*this)))
+			else if (getX() > 0 && !(getWorld()->boulderInTheWay(*this)))
 				moveTo(getX() - 1, getY());
 			break;
 		case KEY_PRESS_RIGHT: //x+1
 			if (getDirection() != right)
 				setDirection(right);
-			else if (getX() < MAX_WINDOW - 4 && !(getWorld()->boulderInFront(*this)))
+			else if (getX() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this)))
 				moveTo(getX() + 1, getY());
 			break;
 		case KEY_PRESS_DOWN:  //y-1
 			if (getDirection() != down)
 				setDirection(down);
-			else if (getY() > 0 && !(getWorld()->boulderInFront(*this)))
+			else if (getY() > 0 && !(getWorld()->boulderInTheWay(*this)))
 				moveTo(getX(), getY() - 1);
 			break;
 		case KEY_PRESS_UP: //y+1
 			if (getDirection() != up)
 				setDirection(up);
-			else if (getY() < MAX_WINDOW - 4 && !(getWorld()->boulderInFront(*this)))
+			else if (getY() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this)))
 				moveTo(getX(), getY() + 1);
 			break;
 		case KEY_PRESS_TAB:
 			if (m_gold_amnt > 0) {
 				m_gold_amnt--;
-				getWorld()->placeGold(this->getX(), this ->getY());
+				getWorld()->placeGold(this->getX(), this->getY());
 				// create gold object
 			}
 			break;
@@ -287,11 +286,11 @@ Gold::Gold(StudentWorld* world, int x, int y, int z)
 	if (z == 1) {
 		gold_state = temporary;
 	}
-	
+
 	m_GoldTick = 100; // how long does the gold nugget last for once its created?
 }
 
-Gold::~Gold(){
+Gold::~Gold() {
 	getWorld()->decGoldLeft();
 }
 
@@ -314,7 +313,7 @@ void Gold::doSomething() {
 	if (this->isVisible() && getStateGold() == permanent) {  //if the gold is visible to the player  pg35, #3
 		int goldX = this->getX();
 		int goldY = this->getY();
-		
+
 		if (getWorld()->icemanNearby(*this, goldX, goldY, 3.0)) {
 			this->setisAlive(false); // if the iceman is 3 units away, set the gold to dead
 			GameController::getInstance().playSound(SOUND_GOT_GOODIE);
