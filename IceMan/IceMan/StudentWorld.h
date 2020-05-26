@@ -15,6 +15,7 @@ class Actor;
 class Ice;
 class Iceman;
 class Boulder;
+class Gold;
 
 class StudentWorld : public GameWorld    //inherited from public gameworld
 {
@@ -34,7 +35,7 @@ public:
 	void createPlayer();
 	void createSquirt(Iceman& man);
 	void createBoulder(int num);
-	void createOil(int num);
+	//void createOil(int num);
 	void createGold(int num);
 	//void createProtestor();
 	//void createHardcoreProtestor();
@@ -51,11 +52,12 @@ public:
 	bool isRoomInFront(const Actor& a); //returns true if there is room for an object in front of player
 	bool iceInFront(const Actor& a);
 	bool boulderInFront(const Actor& a);
-	bool boulderInTheWay(const Actor& a);
+	//bool boulderInTheWay(const Actor& a);
+	bool icemanNearby(const Actor& a, int x, int y, double radius);
 
 	int generateRandX();
 	int generateRandY();
-	bool distance(int x, int y);
+	bool distance(int x, int y); //returns true is distance between actors is far enough
 	double radius(int x1, int y1, int x2, int y2);
 	void deleteIce(int x, int y);
 	void removeDead();
@@ -67,10 +69,14 @@ public:
 	//getters
 	StudentWorld* getStudentWorld();
 	int getBouldersLeft() const;
+	int getGoldLeft() const;
 
 	//setters
 	void decBouldersLeft();
 	void incBouldersLeft();
+	void decGoldLeft();
+	void incGoldLeft();
+	void incIcemanGold();
 
 	//don't call these
 	virtual int init() {
@@ -78,7 +84,7 @@ public:
 		createPlayer();
 		createBoulder(lvlBoulder());
 		//createOil(lvlOil);
-		//createGold(lvlGold);
+		createGold(lvlGold());
 		return GWSTATUS_CONTINUE_GAME;
 	}
 
@@ -94,6 +100,7 @@ private:
 	std::unique_ptr<Iceman> player;
 	std::vector<std::unique_ptr<Actor>> actors;
 	int m_bouldersLeft;
+	int m_goldleft;
 
 };
 
