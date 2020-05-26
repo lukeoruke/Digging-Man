@@ -82,8 +82,6 @@ public:
 	enum state { stable, waiting, falling };
 	void setStateBoulder(state x);
 	state getStateBoulder() const;
-	//int getTick();
-	/*int decrementTick();*/
 
 private:
 	state m_state;
@@ -95,14 +93,14 @@ private:
 class Gold : public Actor
 {
 public:
-	Gold(StudentWorld* world, int x, int y);
+	Gold(StudentWorld* world, int x, int y, int z);
 	~Gold();
 	virtual void doSomething();
-	//enum goldState {permanent, temporary};
-	//void setStateGold(goldState x);
-	//goldState getStateGold() const;
+	enum goldState {permanent, temporary};
+	void setStateGold(goldState x);
+	goldState getStateGold() const;
 private:
-	//goldState m_gold;
+	goldState gold_state;
 	int m_GoldTick;
 };
 
