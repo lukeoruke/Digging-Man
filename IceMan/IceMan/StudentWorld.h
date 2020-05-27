@@ -71,20 +71,23 @@ public:
 	StudentWorld* getStudentWorld();
 	int getBouldersLeft() const;
 	int getGoldLeft() const;
+	int getOilLeft() const;
 
 	//setters
 	void decBouldersLeft();
 	void incBouldersLeft();
 	void decGoldLeft();
 	void incGoldLeft();
-	void incIcemanGold();
+	void incIcemanItem(char item);
+	void incOilLeft();
+	void decOilLeft();
 
 	//don't call these
 	virtual int init() {
 		createIce();
 		createPlayer();
 		createBoulder(lvlBoulder());
-		//createOil(lvlOil());
+		createOil(lvlOil());
 		createGold(lvlGold());
 		return GWSTATUS_CONTINUE_GAME;
 	}
@@ -102,6 +105,7 @@ private:
 	std::vector<std::unique_ptr<Actor>> actors;
 	int m_bouldersLeft;
 	int m_goldleft;
+	int m_oilleft;
 
 };
 
