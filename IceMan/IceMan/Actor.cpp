@@ -23,7 +23,7 @@ const int ICEMAN_START_Y = 60;
 //                                                                            
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////ACTOR//////////////////////////////////////////////////
+//////////////////////////////////////////ACTOR////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////  pg 24
 Actor::Actor(StudentWorld* world, int imageID, int startX, int startY, Direction dir, double size, int depth)
 	:GraphObject(imageID, startX, startY, dir, size, depth)
@@ -77,7 +77,7 @@ Ice::~Ice() {};
 //void Ice::doSomething(){};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////SQUIRT//////////////////////////////////////////////////
+//////////////////////////////////////////SQUIRT///////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 Squirt::Squirt(StudentWorld* world, int row, int col, GraphObject::Direction direction)
 	: Actor(world, IID_WATER_SPURT, row, col, direction, 1.0, 0)
@@ -88,7 +88,6 @@ Squirt::Squirt(StudentWorld* world, int row, int col, GraphObject::Direction dir
 void Squirt::doSomething() {
 
 	if (m_travel_distance > 0 && !getWorld()->iceInFront(*this) && !getWorld()->boulderInFront(*this)) {
-		//TODO: should not be able to pass through boulders
 		moveInDirection();
 		m_travel_distance--;
 	}
@@ -104,7 +103,7 @@ Squirt::~Squirt() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////ICEMAN//////////////////////////////////////////////////
+//////////////////////////////////////////ICEMAN///////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////     pg 27
 Iceman::Iceman(StudentWorld* world)
 	:Actor(world, IID_PLAYER, ICEMAN_START_X, ICEMAN_START_Y, right, 1.0, 0)
@@ -178,9 +177,9 @@ void Iceman::doSomething() {
 				// create gold object
 			}
 			break;
-		case 'Z': //TODO: fix somehow
+		case 'Z': //TODO: huh
 		case 'z':
-			if(m_sonar_amnt > 0) {
+			if (m_sonar_amnt > 0) {
 				m_sonar_amnt--;
 				getWorld()->useSonar();
 			}
@@ -204,7 +203,7 @@ void Iceman::gainSonarIceman() {
 	getWorld()->increaseScore(75);
 }
 void Iceman::gainWaterIceman() {
-	m_water_amnt +=5;
+	m_water_amnt += 5;
 	getWorld()->increaseScore(100);
 }
 int Iceman::getHP() const
@@ -232,7 +231,7 @@ int Iceman::getOilAmnt() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////BOULDER//////////////////////////////////////////////////
+//////////////////////////////////////////BOULDER//////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////   pg31
 Boulder::Boulder(StudentWorld* world, int x, int y)
 	:Actor(world, IID_BOULDER, x, y, down, 1.0, 1) {
@@ -290,12 +289,12 @@ void Boulder::doSomething() {
 
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////GOODIES//////////////////////////////////////////////////
+//////////////////////////////////////////GOODIES//////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////   
 
 // state is the state the item should be(temp,exc..) sound is the SOUNDIID of that item, type is the what type of object it is, I decided to make it with
 // characters( gold = 'g', oil = 'o') By passing all of these in the parameters, we can just use one doSomething for all items. feel free to change anything 
-Goodies::Goodies(StudentWorld* world, int imageID, int x, int y,  Direction dir, double size, int depth, int state, int tick, int sound, char type)
+Goodies::Goodies(StudentWorld* world, int imageID, int x, int y, Direction dir, double size, int depth, int state, int tick, int sound, char type)
 	:Actor(world, imageID, x, y, dir, size, depth) {
 	setVisible(false);
 	setItemState(state);
@@ -350,7 +349,7 @@ void Goodies::doSomething() {
 	}
 }
 //setter
-void Goodies::setItemType(char x) { 
+void Goodies::setItemType(char x) {
 	goodie_type = x;
 }
 void Goodies::setItemState(int state) {
@@ -371,7 +370,7 @@ void Goodies::setItemAmnt(int amnt) {
 	goodie_amnt = amnt;
 }
 //getter
-int Goodies::getItemSound() const { 
+int Goodies::getItemSound() const {
 	return goodie_sound;
 }
 char Goodies::getItemType() {
@@ -397,7 +396,7 @@ void Goodies::decreaseTick() {
 //////////////////////////////////////////GOLD//////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////   pg34
 Gold::Gold(StudentWorld* world, int x, int y, int state)
-	: Goodies(world,IID_GOLD,x,y,right,1.0,2,state,100, SOUND_GOT_GOODIE,'g')
+	: Goodies(world, IID_GOLD, x, y, right, 1.0, 2, state, 100, SOUND_GOT_GOODIE, 'g')
 {
 	getWorld()->incGoldLeft();
 }
@@ -410,7 +409,7 @@ Gold::~Gold() {
 //////////////////////////////////////////OIL//////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////   pg33
 Oil::Oil(StudentWorld* world, int x, int y, int state)
-	: Goodies(world, IID_BARREL, x, y, right, 1.0, 2, state, 0, SOUND_FOUND_OIL,'o')
+	: Goodies(world, IID_BARREL, x, y, right, 1.0, 2, state, 0, SOUND_FOUND_OIL, 'o')
 {
 	getWorld()->incOilLeft();
 }
@@ -421,7 +420,7 @@ Oil::~Oil() {
 //////////////////////////////////////////SONAR//////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////   pg 21pg37
 Sonar::Sonar(StudentWorld* world, int x, int y, int state, int tick)
-	: Goodies(world, IID_SONAR, x, y, right, 1.0, 2, state, tick ,SOUND_GOT_GOODIE, 's')
+	: Goodies(world, IID_SONAR, x, y, right, 1.0, 2, state, tick, SOUND_GOT_GOODIE, 's')
 {
 	getWorld()->incSonarLeft();
 }
