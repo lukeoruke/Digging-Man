@@ -37,6 +37,7 @@ public:
 	void createBoulder(int num);
 	void createOil(int num);
 	void createGold(int num);
+	void createSonar();
 	//void createProtestor();
 	//void createHardcoreProtestor();
 	//std::unique_ptr<Iceman> getPlayer() const; 
@@ -55,6 +56,8 @@ public:
 	bool boulderInTheWay(const Actor& a);
 	bool icemanNearby(const Actor& a, int x, int y, double radius);
 	void placeGold(int x, int y);
+	void createNewItem();
+	void useSonar();
 
 	int generateRandX();
 	int generateRandY();
@@ -72,6 +75,8 @@ public:
 	int getBouldersLeft() const;
 	int getGoldLeft() const;
 	int getOilLeft() const;
+	int getSonarLeft() const;
+	int getSonarTick();
 
 	//setters
 	void decBouldersLeft();
@@ -81,6 +86,9 @@ public:
 	void incIcemanItem(char item);
 	void incOilLeft();
 	void decOilLeft();
+	void incSonarLeft();
+	void decSonarLeft();
+
 
 	//don't call these
 	virtual int init() {
@@ -106,6 +114,7 @@ private:
 	int m_bouldersLeft;
 	int m_goldleft;
 	int m_oilleft;
+	int m_sonarleft;
 
 };
 
