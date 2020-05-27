@@ -178,7 +178,7 @@ void Iceman::doSomething() {
 				// create gold object
 			}
 			break;
-		case 'Z':
+		case 'Z': //TODO: fix somehow
 		case 'z':
 			if(m_sonar_amnt > 0) {
 				m_sonar_amnt--;
@@ -193,15 +193,19 @@ void Iceman::doSomething() {
 }
 void Iceman::gainGoldIceman() {
 	m_gold_amnt++;
+	getWorld()->increaseScore(10);
 }
 void Iceman::gainOilIceman() {
 	m_oil_amnt++;
+	getWorld()->increaseScore(1000);
 }
 void Iceman::gainSonarIceman() {
 	m_sonar_amnt++;
+	getWorld()->increaseScore(75);
 }
 void Iceman::gainWaterIceman() {
 	m_water_amnt +=5;
+	getWorld()->increaseScore(100);
 }
 int Iceman::getHP() const
 {
