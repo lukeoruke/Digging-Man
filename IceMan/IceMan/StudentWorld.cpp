@@ -186,7 +186,7 @@ bool StudentWorld::isRoomInFront(const Actor& a) {
 }
 // x and y are the coord of whatever object is calling the fucntion
 // r is the specific radius specifed by the object
-bool StudentWorld::icemanNearby(const Actor& a, int x, int y, double r) { 
+bool StudentWorld::icemanNearby(const Actor& a, int x, int y, double r) {
 	int playerX = player->getX();
 	int playerY = player->getY();
 
@@ -248,8 +248,15 @@ void StudentWorld::deleteIce(int x, int y) {
 void StudentWorld::createPlayer() {
 	player = std::unique_ptr<Iceman>(new Iceman(this));
 }
-void StudentWorld::incIcemanGold() {
-	player->gainGoldIceman();
+void StudentWorld::incIcemanItem(char x) {
+	switch (x) {
+	case 'g':
+		player->gainGoldIceman();
+		break;
+	case 'o':
+		player->gainOilIceman();
+		break;
+	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////SQUIRT//////////////////////////////////////////////////
@@ -354,38 +361,38 @@ void StudentWorld::incBouldersLeft()
 	m_bouldersLeft++;
 }
 //we used this function
-//bool StudentWorld::boulderInTheWay(const Actor& a)
-//{
-//	bool ans = false;
-	//std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
-	//for (; it != actors.begin() + getBouldersLeft(); ++it)
-	//{
-	//	int xActor = a.getX();
-	//	int yActor = a.getY();
-	//	int xBoulder = (*it)->getX();
-	//	int yBoulder = (*it)->getY();
-	//	switch (a.getDirection()) {
-	//	case GraphObject::Direction::left:
-	//		xActor = xActor - 1;
-	//		break;
-	//	case GraphObject::Direction::right:
-	//		xActor = xActor + 1;
-	//		break;
-	//	case GraphObject::Direction::down:
-	//		yActor = yActor - 1;
-	//		break;
-	//	case GraphObject::Direction::up:
-	//		yActor = yActor + 1;
-	//		break;
-	//	default:
-	//		return false;
-	//	}
-	//	if (radius(xActor, yActor, xBoulder, yBoulder) <= 3)
-	//		ans = true;
-	//}
-//
-//	return ans;
-//}
+bool StudentWorld::boulderInTheWay(const Actor& a)
+{
+	bool ans = false;
+std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
+for (; it != actors.begin() + getBouldersLeft(); ++it)
+{
+	int xActor = a.getX();
+	int yActor = a.getY();
+	int xBoulder = (*it)->getX();
+	int yBoulder = (*it)->getY();
+	switch (a.getDirection()) {
+	case GraphObject::Direction::left:
+		xActor = xActor - 1;
+		break;
+	case GraphObject::Direction::right:
+		xActor = xActor + 1;
+		break;
+	case GraphObject::Direction::down:
+		yActor = yActor - 1;
+		break;
+	case GraphObject::Direction::up:
+		yActor = yActor + 1;
+		break;
+	default:
+		return false;
+	}
+	if (radius(xActor, yActor, xBoulder, yBoulder) <= 3)
+		ans = true;
+}
+
+	return ans;
+}
 
 
 
@@ -430,15 +437,52 @@ void StudentWorld::decGoldLeft()
 void StudentWorld::incGoldLeft() {
 	m_goldleft++;
 }
-void StudentWorld:: placeGold(int x, int y) {
+void StudentWorld::placeGold(int x, int y) {
 	unique_ptr<Gold> gold;
-	gold = unique_ptr<Gold>(new Gold(this, x, y,1));
+	gold = unique_ptr<Gold>(new Gold(this, x, y, 1));
 	actors.emplace_back(std::move(gold));
 }
 
-
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////OIL//////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
 int StudentWorld::lvlOil() {
 	return min(2 + static_cast<int>(getLevel()), 21);
+}
+void StudentWorld::createOil(int num)
+{
+	for (int k = 0; k < num; k++) {
+		int x = 0;
+		int y = 0;
+		do {
+			do {
+				x = generateRandX();
+			} while (x > 26 && x < 34);
+
+			do {
+				y = generateRandY();
+			} while (y < 20);
+
+
+		} while (!distance(x, y));
+		unique_ptr<Oil> oil;
+		oil = unique_ptr<Oil>(new Oil(this, x, y, 0));
+		actors.emplace_back(std::move(oil));
+	}
+}
+
+int StudentWorld::getOilLeft() const
+{
+	return m_oilleft;
+}
+
+void StudentWorld::decOilLeft()
+{
+	m_oilleft--;
+}
+
+void StudentWorld::incOilLeft() {
+	m_oilleft++;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////DISPLAY//////////////////////////////////////////////////
