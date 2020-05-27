@@ -18,14 +18,18 @@ GameWorld* createStudentWorld(string assetDir)
 void StudentWorld::createNewItem() {  //21
 	int g = static_cast<int>(getLevel() * 25 + 300);
 	if (rand() % g + 1 == 1) {  //ranges 1 to g; this should mean a 1/g change of running
-		if ((rand() % g + 1) <= (g / 5)) {  //this should be 1/5, create water
-
-		}
-		else { //rest is 1/4, create sonar
+		if ((rand() % g + 1) <= (g / 5)) {  //this should be 1/5, create sonar
 			createSonar();
+		}
+		else { //rest is 4/5, create water
+			createWater();
 		}
 	}
 	return;
+}
+
+int StudentWorld::getSonarWaterTick() {
+	return max(100, (300 - 10 * static_cast<int>(getLevel())));
 }
 
 //pg 19
@@ -281,15 +285,14 @@ void StudentWorld::incIcemanItem(char x) {
 //pg 29  TODO
 void StudentWorld::useSonar(){
 	GameController::getInstance().playSound(SOUND_SONAR);
-	//int playerX = player->getX();
-	//int playerY = player->getY();
-	//for (int x = playerX; x < playerX+12; x++) {
-	//	for (int y = playerY; y < playerY + 12; y++) {
-	//		if (!iceContainer[x][y]->isVisible()) {
-	//			iceContainer[x][y]->setVisible(true);
-	//		}
-	//	}
-	//}
+	int playerX = player->getX();
+	int playerY = player->getY();
+	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
+	for (; it != actors.end(); it++) {
+		if ((radius(playerX, playerY, (*it)->getX(), (*it)->getY()) < 12)) {
+			(*it)->setVisible(true);
+		}
+	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////SQUIRT//////////////////////////////////////////////////
@@ -427,8 +430,6 @@ for (; it != actors.begin() + getBouldersLeft(); ++it)
 	return ans;
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////GOLD//////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -522,26 +523,10 @@ void StudentWorld::incOilLeft() {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 void StudentWorld::createSonar()
 {
-		int x = 0;
-		int y = 0;
-		do {
-			do {
-				x = generateRandX();
-			} while (x > 26 && x < 34);
-
-			do {
-				y = generateRandY();
-			} while (y < 20);
-
-
-		} while (!distance(x, y));
 		unique_ptr<Sonar> sonar;
-		sonar = unique_ptr<Sonar>(new Sonar(this, 0, 60, 1,getSonarTick()));
+		sonar = unique_ptr<Sonar>(new Sonar(this, 0, 60, 1,getSonarWaterTick()));
 		actors.emplace_back(std::move(sonar));
 	
-}
-int StudentWorld::getSonarTick() {
-	return max(100, (300 - 10*static_cast<int>(getLevel())));
 }
 void StudentWorld:: incSonarLeft(){
 	m_sonarleft++;
@@ -552,8 +537,43 @@ void StudentWorld::decSonarLeft() {
 int StudentWorld::getSonarLeft() const{
 	return m_sonarleft;
 }
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////WATER POOL//////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+void StudentWorld::createWater()   //TYLER MAN HELP PLEASE
+{
+
+	//Each new Water Goodie must be added to a random ice - less spot in the oil field.
+	//Water may only be added to a location if the entire 4x4 grid at that location is free
+	//of Ice.
+	int x = 0;
+	int y = 0;
+	do {
+		do {
+			x = generateRandX();
+		} while (x > 26 && x < 34);
+
+		do {
+			y = generateRandY();
+		} while (y < 20);
 
 
+	} while (!distance(x, y));
+	unique_ptr<Water> water;
+	water = unique_ptr<Water>(new Water(this, x, y, 1, getSonarWaterTick()) );
+	actors.emplace_back(std::move(water));
+
+}
+void StudentWorld::decWaterLeft() {
+	m_waterleft--;
+}
+void StudentWorld::incWaterLeft() {
+	m_waterleft++;
+}
+
+int StudentWorld::getWaterLeft() const {
+	return m_waterleft;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////DISPLAY//////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
