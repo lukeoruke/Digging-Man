@@ -188,7 +188,9 @@ void Iceman::doSomething() {
 void Iceman::gainGoldIceman() {
 	m_gold_amnt++;
 }
-
+void Iceman::gainOilIceman() {
+	m_oil_amnt++;
+}
 int Iceman::getHP() const
 {
 	return m_HP;
@@ -272,65 +274,130 @@ void Boulder::doSomething() {
 
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////GOODIES//////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////   
+
+// state is the state the item should be(temp,exc..) sound is the SOUNDIID of that item, type is the what type of object it is, I decided to make it with
+// characters( gold = 'g', oil = 'o') By passing all of these in the parameters, we can just use one doSomething for all items. feel free to change anything 
+Goodies::Goodies(StudentWorld* world, int imageID, int x, int y,  Direction dir, double size, int depth, int state, int tick, int sound, char type)
+	:Actor(world, imageID, x, y, dir, size, depth) {
+	setVisible(true);
+	setItemState(state);
+	setItemTick(tick);
+	setItemSound(sound);
+	setItemType(type);
+}
+Goodies::~Goodies() {}
+void Goodies::doSomething() {
+	if (!this->getIsAlive()) { //if they are not alive
+		return;
+	}
+
+	if (!this->isVisible()) {  //if the item is currently not visible(gold, oil) NOT SONAR
+		int itemX = this->getX();
+		int itemY = this->getY();
+
+		//if the ice man is in range of the item, make it visible
+		if (getWorld()->icemanNearby(*this, itemX, itemY, 4.0)) {
+			this->setVisible(true);
+			return;
+		}
+	}
+
+	if (this->isVisible() && this->getItemState() == permanent) {  //if the item is visible to the player 
+		int itemX = this->getX();
+		int itemY = this->getY();
+
+		if (getWorld()->icemanNearby(*this, itemX, itemY, 3.0)) {
+			this->setisAlive(false); // if the iceman is 3 units away, set the item to dead
+			GameController::getInstance().playSound(this->getItemSound());
+			getWorld()->incIcemanItem(this->getItemType());
+		}
+	}
+	if (this->getItemState() == temporary) {  //any item that despawns will come here and count down
+		if (this->getItemTick() == 0) {
+			this->setisAlive(false);
+		}
+		this->decreaseTick();
+	}
+}
+//setter
+void Goodies::setItemType(char x) { 
+	goodie_type = x;
+}
+void Goodies::setItemState(int state) {
+	if (state == 0) {
+		goodie_state = permanent;
+	}
+	if (state == 1) {
+		goodie_state = temporary;
+	}
+}
+void Goodies::setItemTick(int tick) {
+	goodie_tick = tick;
+}
+void Goodies::setItemSound(int sound) {
+	goodie_sound = sound;
+}
+void Goodies::setItemAmnt(int amnt) {
+	goodie_amnt = amnt;
+}
+//getter
+int Goodies::getItemSound() const { 
+	return goodie_sound;
+}
+char Goodies::getItemType() {
+	return goodie_type;
+}
+Goodies::goodieState Goodies::getItemState() const {
+	return goodie_state;
+}
+int Goodies::getItemAmnt() {
+	return goodie_amnt;
+}
+
+int Goodies::getItemTick() const {
+	return goodie_tick;
+}
+void Goodies::decreaseTick() {
+	goodie_tick--;
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////GOLD//////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////   pg34
-
-Gold::Gold(StudentWorld* world, int x, int y, int z)
-	: Actor(world, IID_GOLD, x, y, right, 1.0, 2) {
-	setVisible(false);
+Gold::Gold(StudentWorld* world, int x, int y, int state)
+	: Goodies(world,IID_GOLD,x,y,right,1.0,2,state,100, SOUND_GOT_GOODIE,'g')
+{
 	getWorld()->incGoldLeft();
-	if (z == 0) {
-		gold_state = permanent;
-	}
-	if (z == 1) {
-		gold_state = temporary;
-	}
-
-	m_GoldTick = 100; // how long does the gold nugget last for once its created?
 }
 
 Gold::~Gold() {
 	getWorld()->decGoldLeft();
 }
 
-void Gold::doSomething() {
-	if (!this->getIsAlive()) { //if they are not alive
-		return;
-	}
-
-	if (!this->isVisible()) {  //if the gold is currently not visible
-		int goldX = this->getX();
-		int goldY = this->getY();
-
-		//if the ice man is in range of the gold, make it visible
-		if (getWorld()->icemanNearby(*this, goldX, goldY, 4.0)) {
-			this->setVisible(true);
-			return;
-		}
-	}
-
-	if (this->isVisible() && getStateGold() == permanent) {  //if the gold is visible to the player  pg35, #3
-		int goldX = this->getX();
-		int goldY = this->getY();
-
-		if (getWorld()->icemanNearby(*this, goldX, goldY, 3.0)) {
-			this->setisAlive(false); // if the iceman is 3 units away, set the gold to dead
-			GameController::getInstance().playSound(SOUND_GOT_GOODIE);
-			getWorld()->incIcemanGold();
-		}
-	}
-	if (getStateGold() == temporary) {
-		if (m_GoldTick == 0) {
-			this->setisAlive(false);
-		}
-		m_GoldTick--;
-	}
-
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////OIL//////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////   pg33
+Oil::Oil(StudentWorld* world, int x, int y, int state)
+	: Goodies(world, IID_BARREL, x, y, right, 1.0, 2, state, 0, SOUND_FOUND_OIL,'o')
+{
+	getWorld()->incOilLeft();
 }
-void Gold::setStateGold(goldState x) {
-	gold_state = x;
+Oil::~Oil() {
+	getWorld()->decOilLeft();
 }
-Gold::goldState Gold::getStateGold() const {
-	return gold_state;
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////PERSON//////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////   pg34
+
+bool Person::hitByBoulder() {
+	return false;
+}
+int Person::getHP() const {
+	return 0;
 }
