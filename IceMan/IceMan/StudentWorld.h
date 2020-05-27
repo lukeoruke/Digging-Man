@@ -38,6 +38,7 @@ public:
 	void createOil(int num);
 	void createGold(int num);
 	void createSonar();
+	void createWater();
 	//void createProtestor();
 	//void createHardcoreProtestor();
 	//std::unique_ptr<Iceman> getPlayer() const; 
@@ -76,7 +77,9 @@ public:
 	int getGoldLeft() const;
 	int getOilLeft() const;
 	int getSonarLeft() const;
-	int getSonarTick();
+	int getWaterLeft() const;
+	int getSonarWaterTick();
+	
 
 	//setters
 	void decBouldersLeft();
@@ -88,6 +91,8 @@ public:
 	void decOilLeft();
 	void incSonarLeft();
 	void decSonarLeft();
+	void decWaterLeft();
+	void incWaterLeft();
 
 
 	//don't call these
@@ -115,6 +120,7 @@ private:
 	int m_goldleft;
 	int m_oilleft;
 	int m_sonarleft;
+	int m_waterleft;
 
 };
 
