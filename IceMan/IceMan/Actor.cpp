@@ -178,6 +178,12 @@ void Iceman::doSomething() {
 				// create gold object
 			}
 			break;
+		case 'Z':
+		case 'z':
+			if(m_sonar_amnt > 0) {
+				m_sonar_amnt--;
+				getWorld()->useSonar();
+			}
 
 		}
 	}
@@ -190,6 +196,12 @@ void Iceman::gainGoldIceman() {
 }
 void Iceman::gainOilIceman() {
 	m_oil_amnt++;
+}
+void Iceman::gainSonarIceman() {
+	m_sonar_amnt++;
+}
+void Iceman::gainWaterIceman() {
+	m_water_amnt++;
 }
 int Iceman::getHP() const
 {
@@ -283,11 +295,14 @@ void Boulder::doSomething() {
 // characters( gold = 'g', oil = 'o') By passing all of these in the parameters, we can just use one doSomething for all items. feel free to change anything 
 Goodies::Goodies(StudentWorld* world, int imageID, int x, int y,  Direction dir, double size, int depth, int state, int tick, int sound, char type)
 	:Actor(world, imageID, x, y, dir, size, depth) {
-	setVisible(true);
+	setVisible(false);
 	setItemState(state);
 	setItemTick(tick);
 	setItemSound(sound);
 	setItemType(type);
+	if (type == 's') {
+		setVisible(true);
+	}
 }
 Goodies::~Goodies() {}
 void Goodies::doSomething() {
@@ -316,11 +331,20 @@ void Goodies::doSomething() {
 			getWorld()->incIcemanItem(this->getItemType());
 		}
 	}
-	if (this->getItemState() == temporary) {  //any item that despawns will come here and count down
-		if (this->getItemTick() == 0) {
+	if (this->getItemState() == temporary) {  //any item that is in a temporary state will come here and count down(dropped gold, sonar, water)
+		if (this->getItemTick() == 0) { //if the item has no tick left destroy it
 			this->setisAlive(false);
 		}
-		this->decreaseTick();
+		if (getItemType() == 's' || getItemType() == 'w') {  // make sure only sonar and water is pickup able in temporary form, NOT GOLD
+			int itemX = this->getX();
+			int itemY = this->getY();
+			if (getWorld()->icemanNearby(*this, itemX, itemY, 3.0)) {
+				this->setisAlive(false); // if the iceman is 3 units away, set the item to dead
+				GameController::getInstance().playSound(this->getItemSound());
+				getWorld()->incIcemanItem(this->getItemType());
+			}
+		}
+		this->decreaseTick();  //decrease tick
 	}
 }
 //setter
@@ -390,6 +414,17 @@ Oil::Oil(StudentWorld* world, int x, int y, int state)
 }
 Oil::~Oil() {
 	getWorld()->decOilLeft();
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////SONAR//////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////   pg 21pg37
+Sonar::Sonar(StudentWorld* world, int x, int y, int state, int tick)
+	: Goodies(world, IID_SONAR, x, y, right, 1.0, 2, state, tick ,SOUND_GOT_GOODIE, 's')
+{
+	getWorld()->incSonarLeft();
+}
+Sonar::~Sonar() {
+	getWorld()->decSonarLeft();
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////PERSON//////////////////////////////////////////////////
