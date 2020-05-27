@@ -15,7 +15,18 @@ GameWorld* createStudentWorld(string assetDir)
 	return new StudentWorld(assetDir);
 }
 
+void StudentWorld::createNewItem() {  //21
+	int g = static_cast<int>(getLevel() * 25 + 300);
+	if (rand() % g + 1 == 1) {  //ranges 1 to g; this should mean a 1/g change of running
+		if ((rand() % g + 1) <= (g / 5)) {  //this should be 1/5, create water
 
+		}
+		else { //rest is 1/4, create sonar
+			createSonar();
+		}
+	}
+	return;
+}
 
 //pg 19
 int StudentWorld::move() {
@@ -26,6 +37,7 @@ int StudentWorld::move() {
 	player->doSomething();
 
 	if (player->getIsAlive()) {
+		createNewItem();
 
 		if (player->getOilAmnt() < lvlOil()) {   //checks if player got the oil amnt
 												 //then do something for all actors in a for loop
@@ -256,7 +268,28 @@ void StudentWorld::incIcemanItem(char x) {
 	case 'o':
 		player->gainOilIceman();
 		break;
+	case 's':
+		player->gainSonarIceman();
+		break;
+	case 'w':
+		player->gainWaterIceman();
+		break;
 	}
+}
+
+
+//pg 29  TODO
+void StudentWorld::useSonar(){
+	GameController::getInstance().playSound(SOUND_SONAR);
+	//int playerX = player->getX();
+	//int playerY = player->getY();
+	//for (int x = playerX; x < playerX+12; x++) {
+	//	for (int y = playerY; y < playerY + 12; y++) {
+	//		if (!iceContainer[x][y]->isVisible()) {
+	//			iceContainer[x][y]->setVisible(true);
+	//		}
+	//	}
+	//}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////SQUIRT//////////////////////////////////////////////////
@@ -484,6 +517,43 @@ void StudentWorld::decOilLeft()
 void StudentWorld::incOilLeft() {
 	m_oilleft++;
 }
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////SONAR//////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+void StudentWorld::createSonar()
+{
+		int x = 0;
+		int y = 0;
+		do {
+			do {
+				x = generateRandX();
+			} while (x > 26 && x < 34);
+
+			do {
+				y = generateRandY();
+			} while (y < 20);
+
+
+		} while (!distance(x, y));
+		unique_ptr<Sonar> sonar;
+		sonar = unique_ptr<Sonar>(new Sonar(this, 0, 60, 1,getSonarTick()));
+		actors.emplace_back(std::move(sonar));
+	
+}
+int StudentWorld::getSonarTick() {
+	return max(100, (300 - 10*static_cast<int>(getLevel())));
+}
+void StudentWorld:: incSonarLeft(){
+	m_sonarleft++;
+}
+void StudentWorld::decSonarLeft() {
+	m_sonarleft--;
+}
+int StudentWorld::getSonarLeft() const{
+	return m_sonarleft;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////DISPLAY//////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
