@@ -15,9 +15,9 @@ GameWorld* createStudentWorld(string assetDir)
 	return new StudentWorld(assetDir);
 }
 
-void StudentWorld::createNewItem() {  //21
+void StudentWorld::createNewItem() {  //pg 21
 	int g = static_cast<int>(getLevel() * 25 + 300);
-	if (rand() % g == 0) {  //ranges 1 to g; this should mean a 1/g change of running
+	if (rand() % g + 1 == 1) {  //ranges 1 to g; this should mean a 1/g change of running
 		if ((rand() % g + 1) <= (g / 5)) {  //this should be 1/5, create sonar
 			createSonar();
 		}
@@ -112,8 +112,8 @@ void StudentWorld::removeDead() {
 		return;
 
 	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
-	actors.erase(std::remove_if(it, actors.end(), [&](unique_ptr<Actor>& upAct)-> bool
-		{return (upAct->getIsAlive() == false); }),
+	actors.erase(std::remove_if(it, actors.end(), [&](unique_ptr<Actor> &upAct)-> bool
+	{return (upAct->getIsAlive() == false); }),
 		actors.end());
 
 	return;
@@ -232,32 +232,20 @@ bool StudentWorld::iceInFront(const Actor& a) {
 	int y = a.getY();
 	switch (a.getDirection()) {
 	case GraphObject::Direction::left:
-		for (int i = y; i < y + 4; i++)
-		{
-			if (iceContainer[x - 1][i])
-				return true;
-		}
+		if (iceContainer[x - 1][y] || iceContainer[x - 1][y + 3])
+			return true;
 		break;
 	case GraphObject::Direction::right:
-		for (int i = y; i < y + 4; i++)
-		{
-			if (iceContainer[x + 4][i])
-				return true;
-		}
+		if (iceContainer[x + 4][y] || iceContainer[x + 4][y + 3])
+			return true;
 		break;
 	case GraphObject::Direction::down:
-		for (int i = x; i < x + 4; i++)
-		{
-			if (iceContainer[i][y - 1])
-				return true;
-		}
+		if (iceContainer[x][y - 1] || iceContainer[x + 3][y - 1])
+			return true;
 		break;
 	case GraphObject::Direction::up:
-		for (int i = x; i < x + 4; i++)
-		{
-			if (iceContainer[i][y + 4])
-				return true;
-		}
+		if (iceContainer[x][y + 4] || iceContainer[x + 3][y + 4])
+			return true;
 		break;
 	default:
 		return false;
@@ -295,7 +283,7 @@ void StudentWorld::incIcemanItem(char x) {
 
 
 //pg 29  TODO
-void StudentWorld::useSonar() {
+void StudentWorld::useSonar(){
 	GameController::getInstance().playSound(SOUND_SONAR);
 	int playerX = player->getX();
 	int playerY = player->getY();
@@ -412,32 +400,32 @@ void StudentWorld::incBouldersLeft()
 bool StudentWorld::boulderInTheWay(const Actor& a)
 {
 	bool ans = false;
-	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
-	for (; it != actors.begin() + getBouldersLeft(); ++it)
-	{
-		int xActor = a.getX();
-		int yActor = a.getY();
-		int xBoulder = (*it)->getX();
-		int yBoulder = (*it)->getY();
-		switch (a.getDirection()) {
-		case GraphObject::Direction::left:
-			xActor = xActor - 1;
-			break;
-		case GraphObject::Direction::right:
-			xActor = xActor + 1;
-			break;
-		case GraphObject::Direction::down:
-			yActor = yActor - 1;
-			break;
-		case GraphObject::Direction::up:
-			yActor = yActor + 1;
-			break;
-		default:
-			return false;
-		}
-		if (radius(xActor, yActor, xBoulder, yBoulder) <= 3)
-			ans = true;
+std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
+for (; it != actors.begin() + getBouldersLeft(); ++it)
+{
+	int xActor = a.getX();
+	int yActor = a.getY();
+	int xBoulder = (*it)->getX();
+	int yBoulder = (*it)->getY();
+	switch (a.getDirection()) {
+	case GraphObject::Direction::left:
+		xActor = xActor - 1;
+		break;
+	case GraphObject::Direction::right:
+		xActor = xActor + 1;
+		break;
+	case GraphObject::Direction::down:
+		yActor = yActor - 1;
+		break;
+	case GraphObject::Direction::up:
+		yActor = yActor + 1;
+		break;
+	default:
+		return false;
 	}
+	if (radius(xActor, yActor, xBoulder, yBoulder) <= 3)
+		ans = true;
+}
 
 	return ans;
 }
@@ -465,7 +453,7 @@ void StudentWorld::createGold(int num)
 
 		} while (!distance(x, y));
 		unique_ptr<Gold> gold;
-		gold = unique_ptr<Gold>(new Gold(this, x, y, 0));
+		gold = unique_ptr<Gold>(new Gold(this, x, y, false));  //false to make gold invis when first created
 		actors.emplace_back(std::move(gold));
 	}
 }
@@ -485,13 +473,13 @@ void StudentWorld::incGoldLeft() {
 }
 void StudentWorld::placeGold(int x, int y) {
 	unique_ptr<Gold> gold;
-	gold = unique_ptr<Gold>(new Gold(this, x, y, 1));
+	gold = unique_ptr<Gold>(new Gold(this, x, y, true)); //true to make gold visible
 	actors.emplace_back(std::move(gold));
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////OIL//////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////OIL//////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
 int StudentWorld::lvlOil() {
 	return min(2 + static_cast<int>(getLevel()), 21);
 }
@@ -512,7 +500,7 @@ void StudentWorld::createOil(int num)
 
 		} while (!distance(x, y));
 		unique_ptr<Oil> oil;
-		oil = unique_ptr<Oil>(new Oil(this, x, y, 0));
+		oil = unique_ptr<Oil>(new Oil(this, x, y));
 		actors.emplace_back(std::move(oil));
 	}
 }
@@ -530,29 +518,29 @@ void StudentWorld::decOilLeft()
 void StudentWorld::incOilLeft() {
 	m_oilleft++;
 }
-///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////SONAR//////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////SONAR//////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
 void StudentWorld::createSonar()
 {
-	unique_ptr<Sonar> sonar;
-	sonar = unique_ptr<Sonar>(new Sonar(this, 0, 60, 1, getSonarWaterTick()));
-	actors.emplace_back(std::move(sonar));
-
+		unique_ptr<Sonar> sonar;
+		sonar = unique_ptr<Sonar>(new Sonar(this, 0, 60, true, getSonarWaterTick()));
+		actors.emplace_back(std::move(sonar));
+	
 }
-void StudentWorld::incSonarLeft() {
+void StudentWorld:: incSonarLeft(){
 	m_sonarleft++;
 }
 void StudentWorld::decSonarLeft() {
 	m_sonarleft--;
 }
-int StudentWorld::getSonarLeft() const {
+int StudentWorld::getSonarLeft() const{
 	return m_sonarleft;
 }
-///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////WATER POOL//////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
-void StudentWorld::createWater()
+/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////WATER POOL//////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+void StudentWorld::createWater()   //TYLER MAN HELP PLEASE
 {
 
 	//Each new Water Goodie must be added to a random ice - less spot in the oil field.
@@ -561,16 +549,18 @@ void StudentWorld::createWater()
 	int x = 0;
 	int y = 0;
 	do {
-		
-		x = generateRandX();
+		do {
+			x = generateRandX();
+		} while (x > 26 && x < 34);
+
 		do {
 			y = generateRandY();
 		} while (y < 20);
 
-	} while (overlapAt(x, y));
-	
+
+	} while (overlapAt(x,y));
 	unique_ptr<Water> water;
-	water = unique_ptr<Water>(new Water(this, x, y, 1, getSonarWaterTick()));
+	water = unique_ptr<Water>(new Water(this, x, y, true, getSonarWaterTick()) );
 	actors.emplace_back(std::move(water));
 
 }
@@ -597,7 +587,7 @@ string StudentWorld::formatStats(unsigned int level, unsigned int lives, int hea
 	string s_gold = "Gld:  " + to_string(gold) + "  ";
 	string s_barrel = "Oil Left:  " + to_string(barrelsLeft) + "  ";
 	string s_sonar = "Sonar:  " + to_string(sonar) + "  ";
-	string s_score = "Scr:  " + to_string(score);         //TODO: MAKE THIS DISPLAY 6 DIGITS
+	string s_score = "Scr:  " + to_string(score);         //MAKE THIS DISPLAY 6 DIGITS
 
 	string display = s_level + s_lives + s_health + s_squirt + s_gold + s_barrel + s_sonar + s_score;
 	return display;
@@ -606,7 +596,7 @@ string StudentWorld::formatStats(unsigned int level, unsigned int lives, int hea
 void StudentWorld::setDisplayText() {
 	unsigned int level = getLevel();
 	unsigned int lives = getLives();
-	int health = (*player).getHP()* 10;
+	int health = (*player).getHP()*10;
 	int squirts = (*player).getWaterAmnt();
 	int gold = (*player).getGoldAmnt();
 	int barrelsLeft = lvlOil() - (*player).getOilAmnt();
