@@ -23,7 +23,7 @@ const int ICEMAN_START_Y = 60;
 //                                                                            
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////ACTOR//////////////////////////////////////////////////
+//////////////////////////////////////////ACTOR////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////  pg 24
 Actor::Actor(StudentWorld* world, int imageID, int startX, int startY, Direction dir, double size, int depth)
 	:GraphObject(imageID, startX, startY, dir, size, depth)
@@ -77,7 +77,7 @@ Ice::~Ice() {};
 //void Ice::doSomething(){};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////SQUIRT//////////////////////////////////////////////////
+//////////////////////////////////////////SQUIRT///////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 Squirt::Squirt(StudentWorld* world, int row, int col, GraphObject::Direction direction)
 	: Actor(world, IID_WATER_SPURT, row, col, direction, 1.0, 0)
@@ -88,7 +88,6 @@ Squirt::Squirt(StudentWorld* world, int row, int col, GraphObject::Direction dir
 void Squirt::doSomething() {
 
 	if (m_travel_distance > 0 && !getWorld()->iceInFront(*this) && !getWorld()->boulderInFront(*this)) {
-		//TODO: should not be able to pass through boulders
 		moveInDirection();
 		m_travel_distance--;
 	}
@@ -98,17 +97,22 @@ void Squirt::doSomething() {
 	return;
 }
 
+bool Squirt::annoy(unsigned int amt)
+{
+	return false;
+}
+
 Squirt::~Squirt() {
 	setisAlive(false);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////ICEMAN//////////////////////////////////////////////////
+//////////////////////////////////////////ICEMAN///////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////     pg 27
 Iceman::Iceman(StudentWorld* world)
-	:Actor(world, IID_PLAYER, ICEMAN_START_X, ICEMAN_START_Y, right, 1.0, 0)
+	:Person(world, IID_PLAYER, ICEMAN_START_X, ICEMAN_START_Y, right, 10)
 {
-	m_HP = 10;
 	m_water_amnt = 5;
 	m_sonar_amnt = 1;
 	m_gold_amnt = 0;
@@ -118,7 +122,8 @@ Iceman::~Iceman() {}
 
 void Iceman::doSomething() {
 	//check if the iceman is alive
-	if (m_HP <= 0) {
+	if (getHP() <= 0) {
+		GameController::getInstance().playSound(SOUND_PLAYER_GIVE_UP);
 		setisAlive(false);
 		return;
 	}
@@ -177,50 +182,57 @@ void Iceman::doSomething() {
 				// create gold object
 			}
 			break;
-		case 'Z':
+		case 'Z': //TODO: huh
 		case 'z':
-			if(m_sonar_amnt > 0) {
+			if (m_sonar_amnt > 0) {
 				m_sonar_amnt--;
 				getWorld()->useSonar();
 			}
 
 		}
 	}
+
+
+
 }
-void Iceman::gainGoldIceman() {
+void Iceman::gainGold() {
 	m_gold_amnt++;
+	getWorld()->increaseScore(10);
 }
 void Iceman::gainOilIceman() {
 	m_oil_amnt++;
+	getWorld()->increaseScore(1000);
 }
 void Iceman::gainSonarIceman() {
 	m_sonar_amnt++;
+	getWorld()->increaseScore(75);
 }
 void Iceman::gainWaterIceman() {
-	m_water_amnt +=5;
+	m_water_amnt += 5;
+	getWorld()->increaseScore(100);
 }
-int Iceman::getHP() const
-{
-	return m_HP;
-}
+
 int Iceman::getWaterAmnt() const
 {
 	return m_water_amnt;
 }
+
 int Iceman::getSonarAmnt() const
 {
 	return m_sonar_amnt;
 }
+
 int Iceman::getGoldAmnt() const
 {
 	return m_gold_amnt;
 }
+
 int Iceman::getOilAmnt() const {
 	return m_oil_amnt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////BOULDER//////////////////////////////////////////////////
+//////////////////////////////////////////BOULDER//////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////   pg31
 Boulder::Boulder(StudentWorld* world, int x, int y)
 	:Actor(world, IID_BOULDER, x, y, down, 1.0, 1) {
@@ -265,6 +277,7 @@ void Boulder::doSomething() {
 		break;
 	case Boulder::state::falling:
 		this->moveInDirection();
+		getWorld()->annoyNearbyPeople(*this, 100);
 		//check after one tick whether there is ice, boulder, or out of border
 		if (getWorld()->iceInFront(*this) || getWorld()->boulderInFront(*this)
 			|| getY() == 0)
@@ -274,18 +287,36 @@ void Boulder::doSomething() {
 
 		break;
 	}
+
+
+}
+bool Boulder::annoy(unsigned int amt)
+{
+	return false;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////GOODIES//////////////////////////////////////////////////
+//////////////////////////////////////////GOODIES//////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////   
+
+// state is the state the item should be(temp,exc..) sound is the SOUNDIID of that item, type is the what type of object it is, I decided to make it with
+// characters( gold = 'g', oil = 'o') By passing all of these in the parameters, we can just use one doSomething for all items. feel free to change anything 
 Goodies::Goodies(StudentWorld* world, int x, int y, int imageID,
 	int sound, bool activateOnPlayer, bool activateOnProtester)
-	:Actor(world, imageID, x, y, right, 1.0, 2) {
+	:Actor(world, imageID, x, y, right, 1, 2) {
 	goodie_sound = sound;
 	is_active_on_player = activateOnPlayer;
 	is_active_on_protest = activateOnProtester;
 }
-int Goodies::getItemSound() const { 
+Goodies::~Goodies() {}
+
+bool Goodies::annoy(unsigned int amt)
+{
+	return false;
+}
+
+//getters
+
+int Goodies::getItemSound() const {
 	return goodie_sound;
 }
 bool Goodies::getIsActiveOnPlayer() const {
@@ -300,7 +331,10 @@ Goodies::goodieState Goodies::getItemState() const {
 int Goodies::getitemTick() const {
 	return m_ticks;
 }
-void Goodies:: decreaseTick() {
+
+//setters
+
+void Goodies::decreaseTick() {
 	m_ticks--;
 }
 void Goodies::setItemState(bool temp) {
@@ -314,12 +348,13 @@ void Goodies::setItemState(bool temp) {
 void Goodies::setitemTicks(int ticks) {
 	m_ticks = ticks;
 }
-Goodies::~Goodies() {}
-/////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////GOLD//////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////   pg34
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////GOLD/////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////   pg34
 Gold::Gold(StudentWorld* world, int x, int y, bool temporary)
-	: Goodies(world, x, y, IID_GOLD,SOUND_GOT_GOODIE,true,true) {
+	: Goodies(world, x, y, IID_GOLD, SOUND_GOT_GOODIE, true, true) {
 	getWorld()->incGoldLeft();
 	setItemState(temporary);
 	setitemTicks(100);
@@ -365,9 +400,10 @@ void Gold::doSomething() {
 		this->decreaseTick();  //decrease tick
 	}
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////OIL//////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////   pg33
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////OIL//////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////   pg33
 Oil::Oil(StudentWorld* world, int x, int y)
 	: Goodies(world, x, y, IID_BARREL, SOUND_FOUND_OIL, true, true)
 {
@@ -392,40 +428,42 @@ void Oil::doSomething() {
 		}
 	}
 	if (this->isVisible() && (getWorld()->icemanNearby(*this, this->getX(), this->getY(), 3.0))) {  //if the oil is visible to the player and close enough, pick it up
-			this->setisAlive(false); // if the iceman is 3 units away, set the item to dead
-			GameController::getInstance().playSound(this->getItemSound());
-			getWorld()->incIcemanItem('o');  //increase the oil amnt
+		this->setisAlive(false); // if the iceman is 3 units away, set the item to dead
+		GameController::getInstance().playSound(this->getItemSound());
+		getWorld()->incIcemanItem('o');  //increase the oil amnt
 	}
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////SONAR//////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////   pg 21pg37
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////SONAR////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////   pg 21pg37
 Sonar::Sonar(StudentWorld* world, int x, int y, bool temp, int tick)
 	: Goodies(world, x, y, IID_SONAR, SOUND_GOT_GOODIE, true, false)
 {
 	getWorld()->incSonarLeft();
 	setVisible(true);    //sonar should be visible
-	setitemTicks(tick); 
+	setitemTicks(tick);
 }
 Sonar::~Sonar() {
 	getWorld()->decSonarLeft();
 }
 void Sonar::doSomething() {
-		if (this->getitemTick() == 0) { //if the item has no tick left destroy it
-			this->setisAlive(false);
-		}
-		int itemX = this->getX();
-		int itemY = this->getY();
-		if (getWorld()->icemanNearby(*this, itemX, itemY, 3.0)) { // if the iceman is 3 units away, set the item to dead
-			this->setisAlive(false); 
-			GameController::getInstance().playSound(this->getItemSound());
-			getWorld()->incIcemanItem('s');  //incrase the sonar amnt
-		}
-		this->decreaseTick();   //decrease the tick by one
+	if (this->getitemTick() == 0) { //if the item has no tick left destroy it
+		this->setisAlive(false);
+	}
+	int itemX = this->getX();
+	int itemY = this->getY();
+	if (getWorld()->icemanNearby(*this, itemX, itemY, 3.0)) { // if the iceman is 3 units away, set the item to dead
+		this->setisAlive(false);
+		GameController::getInstance().playSound(this->getItemSound());
+		getWorld()->incIcemanItem('s');  //incrase the sonar amnt
+	}
+	this->decreaseTick();   //decrease the tick by one
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////WATER//////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////   pg 38
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////WATER////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////   pg 38
 Water::Water(StudentWorld* world, int x, int y, bool temp, int tick)
 	: Goodies(world, x, y, IID_WATER_POOL, SOUND_GOT_GOODIE, true, false)
 {
@@ -451,13 +489,74 @@ void Water::doSomething() {
 	this->decreaseTick();    //decrease the tick by one
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////PERSON//////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////   pg34
-//
-//bool Person::hitByBoulder() {
-//	return false;
-//}
-//int Person::getHP() const {
-//	return 0;
-//}
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////PERSON///////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////   pg34
+
+
+Person::Person(StudentWorld* world, int imageID, int startX, int startY, Direction dir, unsigned int health)
+	:Actor(world, imageID, startX, startY, dir, 1, 0)
+{
+	m_HP = health;
+
+}
+
+Person::~Person()
+{
+}
+
+bool Person::annoy(unsigned int amt)
+{
+	m_HP = m_HP - amt;
+	return true;
+}
+
+int Person::getHP() const {
+	return m_HP;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////PROTESTOR////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+Protestor::Protestor(StudentWorld* world, int x, int y, int imageID, unsigned int health) 
+	:Person(world, imageID, x, y, left, health)
+{
+	m_leaveState = false;
+}
+
+Protestor::~Protestor()
+{
+}
+
+bool Protestor::annoy(unsigned int amt)
+{
+	if (getIsLeaving())
+		return false;
+	else
+		m_HP = m_HP - amt;
+	return true;
+}
+
+bool Protestor::getIsLeaving()
+{
+	return m_leaveState;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////REGULAR//////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+RegularProtestor::RegularProtestor(StudentWorld* world, int x, int y)
+	:Protestor(world, x, y, IID_PROTESTER, 5)
+{
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////HARDCORE/////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+HardcoreProtestor::HardcoreProtestor(StudentWorld* world, int x, int y)
+	:Protestor(world, x, y, IID_HARD_CORE_PROTESTER, 10)
+{
+}
