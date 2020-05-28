@@ -75,6 +75,8 @@ public:
 	StudentWorld* getStudentWorld();
 	int getBouldersLeft() const;
 	int getGoldLeft() const;
+
+	//we may be able to delete these below
 	int getOilLeft() const;
 	int getSonarLeft() const;
 	int getWaterLeft() const;
