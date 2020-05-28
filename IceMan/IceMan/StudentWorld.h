@@ -51,6 +51,7 @@ public:
 	void overlap(const Actor& a);
 	bool overlapAt(int x, int y);
 
+	void annoyNearbyPeople(const Actor& a, unsigned int hp);
 	bool isRoomInFront(const Actor& a); //returns true if there is room for an object in front of player
 	bool iceInFront(const Actor& a);
 	bool boulderInFront(const Actor& a);
@@ -75,13 +76,11 @@ public:
 	StudentWorld* getStudentWorld();
 	int getBouldersLeft() const;
 	int getGoldLeft() const;
-
-	//we may be able to delete these below
 	int getOilLeft() const;
 	int getSonarLeft() const;
 	int getWaterLeft() const;
 	int getSonarWaterTick();
-	
+
 
 	//setters
 	void decBouldersLeft();
