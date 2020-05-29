@@ -481,7 +481,7 @@ void StudentWorld::createGold(int num)
 
 		} while (!distance(x, y));
 		unique_ptr<Gold> gold;
-		gold = unique_ptr<Gold>(new Gold(this, x, y, false)); //false to make gold invisiible when created
+		gold = unique_ptr<Gold>(new Gold(this, x, y, false , true, false)); //false to make gold invisible when created
 		actors.emplace_back(std::move(gold));
 	}
 }
@@ -501,7 +501,7 @@ void StudentWorld::incGoldLeft() {
 }
 void StudentWorld::placeGold(int x, int y) {
 	unique_ptr<Gold> gold;
-	gold = unique_ptr<Gold>(new Gold(this, x, y, true)); //true to make gold visible
+	gold = unique_ptr<Gold>(new Gold(this, x, y, true, false, true)); //true to make gold visible
 	actors.emplace_back(std::move(gold));
 }
 
