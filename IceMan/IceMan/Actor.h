@@ -14,7 +14,7 @@ public:
 	virtual void doSomething() = 0;
 	virtual bool annoy(unsigned int amt) = 0;
 	//setters
-	bool setisAlive(bool status);
+	bool setDead();
 	//getters
 	StudentWorld* getWorld() const;
 	bool getIsAlive();
