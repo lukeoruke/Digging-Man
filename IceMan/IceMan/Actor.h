@@ -3,6 +3,7 @@
 
 #include "GraphObject.h"
 #include "StudentWorld.h"
+#include <algorithm>
 
 class StudentWorld;
 
@@ -88,7 +89,7 @@ private:
 class Gold : public Goodies
 {
 public:
-	Gold(StudentWorld* world, int startX, int startY, bool temporary);
+	Gold(StudentWorld* world, int startX, int startY, bool temporary, bool activateOnPlayer, bool activateOnProtester);
 	~Gold();
 	virtual void doSomething();
 };
@@ -193,12 +194,15 @@ public:
 	Protestor(StudentWorld* world, int x, int y, int imageID, unsigned int health);
 	virtual ~Protestor() = 0;
 	virtual bool annoy(unsigned int amt);
+	
 	//setters
 
 	//getters
 	bool getIsLeaving();
-private:
+protected:
+
 	bool m_leaveState; //starts out in a Not leave the oil state (false)
+
 };
 
 class RegularProtestor : public Protestor
@@ -214,6 +218,9 @@ class HardcoreProtestor : public Protestor
 {
 public:
 	HardcoreProtestor(StudentWorld* world, int x, int y);
+
+protected:
+
 
 private:
 
