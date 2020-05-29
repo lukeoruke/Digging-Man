@@ -63,7 +63,7 @@ public:
 	virtual ~Goodies();
 	virtual bool annoy(unsigned int amt);
 	enum goodieState { permanent, temporary };
-	
+
 	//getters
 	int getItemSound() const;
 	bool getIsActiveOnPlayer() const;
@@ -143,7 +143,7 @@ public:
 	virtual ~Person();
 	//TODO: implement virtual functions for abstract class
 	//setters
-	
+
 	virtual void gainGold() = 0;
 	virtual bool annoy(unsigned int amt);
 
@@ -152,7 +152,7 @@ public:
 
 protected:
 	unsigned int m_HP;
-	
+
 private:
 
 };
@@ -194,7 +194,7 @@ public:
 	Protestor(StudentWorld* world, int x, int y, int imageID, unsigned int health);
 	virtual ~Protestor() = 0;
 	virtual bool annoy(unsigned int amt);
-	
+
 	//setters
 
 	//getters
@@ -202,6 +202,8 @@ public:
 protected:
 
 	bool m_leaveState; //starts out in a Not leave the oil state (false)
+	int m_ticksWait;
+	int rest_state;
 
 };
 
@@ -209,6 +211,8 @@ class RegularProtestor : public Protestor
 {
 public:
 	RegularProtestor(StudentWorld* world, int x, int y);
+	void doSomething();
+	void gainGold();
 
 private:
 
