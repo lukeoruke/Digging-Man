@@ -523,10 +523,11 @@ int Person::getHP() const {
 //////////////////////////////////////////PROTESTOR////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-Protestor::Protestor(StudentWorld* world, int x, int y, int imageID, unsigned int health) 
+Protestor::Protestor(StudentWorld* world, int x, int y, int imageID, unsigned int health)
 	:Person(world, imageID, x, y, left, health)
 {
 	m_leaveState = false;
+	rest_state = 0;
 
 }
 
@@ -554,10 +555,24 @@ bool Protestor::getIsLeaving()
 RegularProtestor::RegularProtestor(StudentWorld* world, int x, int y)
 	:Protestor(world, x, y, IID_PROTESTER, 5)
 {
-
+	m_ticksWait = std::max(0, 3 - static_cast<int>(getWorld()->getLevel()) / 4);
 }
 
+void RegularProtestor::doSomething() {
+	if (!this->getIsAlive()) { //1
+		return;
+	}
+	if (this->rest_state != m_ticksWait) { //2
+		this->rest_state;
+		return;
+	}
+	//if (getIsLeaving()) {
 
+	//}
+	//rest_state = 0;
+}
+
+void RegularProtestor::gainGold() {}
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////HARDCORE/////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
