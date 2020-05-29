@@ -113,7 +113,7 @@ void StudentWorld::removeDead() {
 
 	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
 	actors.erase(std::remove_if(it, actors.end(), [&](unique_ptr<Actor>& upAct)-> bool
-		{return (upAct->getIsAlive() == false); }),
+	{return (upAct->getIsAlive() == false); }),
 		actors.end());
 
 	return;
@@ -311,20 +311,16 @@ void StudentWorld::incIcemanItem(char x) {
 		break;
 	}
 }
-
-
-//pg 29  TODO
-void StudentWorld::useSonar() {
-	GameController::getInstance().playSound(SOUND_SONAR);
-	int playerX = player->getX();
-	int playerY = player->getY();
-	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
-	for (; it != actors.end(); it++) {
-		if ((radius(playerX, playerY, (*it)->getX(), (*it)->getY()) < 12)) {
-			(*it)->setVisible(true);
-		}
-	}
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////PROTESTOR///////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+void StudentWorld::createProtestor() {
+	unique_ptr<RegularProtestor> protestor;
+	protestor = unique_ptr<RegularProtestor>(new RegularProtestor(this, 60, 60));
+	actors.emplace_back(std::move(protestor));
 }
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////SQUIRT///////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -481,7 +477,7 @@ void StudentWorld::createGold(int num)
 
 		} while (!distance(x, y));
 		unique_ptr<Gold> gold;
-		gold = unique_ptr<Gold>(new Gold(this, x, y, false , true, false)); //false to make gold invisible when created
+		gold = unique_ptr<Gold>(new Gold(this, x, y, false, true, false)); //false to make gold invisible when created
 		actors.emplace_back(std::move(gold));
 	}
 }
@@ -562,6 +558,17 @@ void StudentWorld::decSonarLeft() {
 int StudentWorld::getSonarLeft() const {
 	return m_sonarleft;
 }
+void StudentWorld::useSonar() {
+	GameController::getInstance().playSound(SOUND_SONAR);
+	int playerX = player->getX();
+	int playerY = player->getY();
+	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
+	for (; it != actors.end(); it++) {
+		if ((radius(playerX, playerY, (*it)->getX(), (*it)->getY()) < 12)) {
+			(*it)->setVisible(true);
+		}
+	}
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////WATER POOL///////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -574,14 +581,14 @@ void StudentWorld::createWater()
 	int x = 0;
 	int y = 0;
 	do {
-		
+
 		x = generateRandX();
 		do {
 			y = generateRandY();
 		} while (y < 20);
 
 	} while (overlapAt(x, y));
-	
+
 	unique_ptr<Water> water;
 	water = unique_ptr<Water>(new Water(this, x, y, true, getSonarWaterTick()));
 	actors.emplace_back(std::move(water));
@@ -619,7 +626,7 @@ string StudentWorld::formatStats(unsigned int level, unsigned int lives, int hea
 void StudentWorld::setDisplayText() {
 	unsigned int level = getLevel();
 	unsigned int lives = getLives();
-	int health = (*player).getHP()* 10;
+	int health = (*player).getHP() * 10;
 	int squirts = (*player).getWaterAmnt();
 	int gold = (*player).getGoldAmnt();
 	int barrelsLeft = lvlOil() - (*player).getOilAmnt();
