@@ -175,17 +175,22 @@ double StudentWorld::radius(int x1, int y1, int x2, int y2) {
 	return d;
 }
 
-void StudentWorld::annoyNearbyPeople(const Actor& a, unsigned int hp)
+bool StudentWorld::annoyNearbyPeople(const Actor& a, unsigned int hp)
 {
-	if (radius(player->getX(), player->getY(), a.getX(), a.getY()) <= 3)
-		player->annoy(hp);
+	bool ans = false;
+	if (radius(player->getX(), player->getY(), a.getX(), a.getY()) <= 3) {
+		if (player->annoy(hp))
+			ans = true;
+	}
 	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
 	for (; it != actors.end(); it++) {
 		if (radius(a.getX(), a.getY(), (*it)->getX(), (*it)->getY()) <= 3) {
-			(*it)->annoy(hp);
+			if ((*it)->annoy(hp))
+				ans = true;
 			//TODO: pg 43,48 make sure score gets increased accordingly
 		}
 	}
+	return ans;
 }
 
 bool StudentWorld::isRoomInFront(const Actor& a) {
