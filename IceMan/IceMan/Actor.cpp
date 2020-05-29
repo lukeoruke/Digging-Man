@@ -186,7 +186,7 @@ void Iceman::doSomething() {
 				// create gold object
 			}
 			break;
-		case 'Z': //TODO: huh
+		case 'Z':
 		case 'z':
 			if (m_sonar_amnt > 0) {
 				m_sonar_amnt--;
@@ -357,8 +357,8 @@ void Goodies::setitemTicks(int ticks) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////GOLD/////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////   pg34
-Gold::Gold(StudentWorld* world, int x, int y, bool temporary)
-	: Goodies(world, x, y, IID_GOLD, SOUND_GOT_GOODIE, true, true) {
+Gold::Gold(StudentWorld* world, int x, int y, bool temporary, bool activateOnPlayer, bool activateOnProtester)
+	: Goodies(world, x, y, IID_GOLD, SOUND_GOT_GOODIE, activateOnPlayer, activateOnProtester) {
 	getWorld()->incGoldLeft();
 	setItemState(temporary);
 	setitemTicks(100);
@@ -409,7 +409,7 @@ void Gold::doSomething() {
 //////////////////////////////////////////OIL//////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////   pg33
 Oil::Oil(StudentWorld* world, int x, int y)
-	: Goodies(world, x, y, IID_BARREL, SOUND_FOUND_OIL, true, true)
+	: Goodies(world, x, y, IID_BARREL, SOUND_FOUND_OIL, true, false)
 {
 	getWorld()->incOilLeft();
 	setVisible(false);   //oil should be invisible
@@ -527,6 +527,7 @@ Protestor::Protestor(StudentWorld* world, int x, int y, int imageID, unsigned in
 	:Person(world, imageID, x, y, left, health)
 {
 	m_leaveState = false;
+
 }
 
 Protestor::~Protestor()
@@ -561,6 +562,6 @@ RegularProtestor::RegularProtestor(StudentWorld* world, int x, int y)
 //////////////////////////////////////////HARDCORE/////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 HardcoreProtestor::HardcoreProtestor(StudentWorld* world, int x, int y)
-	:Protestor(world, x, y, IID_HARD_CORE_PROTESTER, 10)
+	:Protestor(world, x, y, IID_HARD_CORE_PROTESTER, 20)
 {
 }
