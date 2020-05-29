@@ -51,7 +51,7 @@ public:
 	void overlap(const Actor& a);
 	bool overlapAt(int x, int y);
 
-	void annoyNearbyPeople(const Actor& a, unsigned int hp);
+	bool annoyNearbyPeople(const Actor& a, unsigned int hp);
 	bool isRoomInFront(const Actor& a); //returns true if there is room for an object in front of player
 	bool iceInFront(const Actor& a);
 	bool boulderInFront(const Actor& a);
@@ -67,7 +67,6 @@ public:
 	double radius(int x1, int y1, int x2, int y2); //takes two sets of coordinates and returns the euclidean distance between them
 	void deleteIce(int x, int y);
 	void removeDead();
-
 
 	void setDisplayText();
 	std::string formatStats(unsigned int level, unsigned int lives, int health, int squirts, int gold, int barrelsLeft, int sonar, int score);
