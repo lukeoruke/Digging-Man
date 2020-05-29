@@ -6,7 +6,6 @@ const int ICEMAN_START_X = 30;
 const int ICEMAN_START_Y = 60;
 
 
-
 //  GRAPH OBJ
 //      |
 //   ________
@@ -18,8 +17,10 @@ const int ICEMAN_START_Y = 60;
 // BOULDER,SQUIRT(maybe)       PERSON                         GOODIES
 //                               |                               |
 //                     ______________________           ____________________
-//                    |           |          |      
-//                 ICEMAN      N. Prot.   HC. PROT.
+//                    |                      |
+//                  ICEMAN               Protestor
+//                                       |       |      
+//                                   Reg. Prot.   HC. PROT.
 //                                                                            
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -39,8 +40,8 @@ StudentWorld* Actor::getWorld() const {
 	return  m_world;
 }
 
-bool Actor::setisAlive(bool status) {
-	return m_isAlive = status;
+bool Actor::setDead() {
+	return m_isAlive = false;
 }
 bool Actor::getIsAlive() {
 	return m_isAlive;
@@ -86,13 +87,16 @@ Squirt::Squirt(StudentWorld* world, int row, int col, GraphObject::Direction dir
 }
 
 void Squirt::doSomething() {
-
-	if (m_travel_distance > 0 && !getWorld()->iceInFront(*this) && !getWorld()->boulderInFront(*this)) {
+	if (getWorld()->annoyNearbyPeople(*this, 2)) {
+		setDead();
+	}
+	else if (m_travel_distance > 0 && !getWorld()->iceInFront(*this) && !getWorld()->boulderInFront(*this)) {
 		moveInDirection();
 		m_travel_distance--;
+
 	}
 	else {
-		setisAlive(false);
+		setDead();
 	}
 	return;
 }
@@ -103,7 +107,7 @@ bool Squirt::annoy(unsigned int amt)
 }
 
 Squirt::~Squirt() {
-	setisAlive(false);
+	setDead();
 
 }
 
@@ -124,7 +128,7 @@ void Iceman::doSomething() {
 	//check if the iceman is alive
 	if (getHP() <= 0) {
 		GameController::getInstance().playSound(SOUND_PLAYER_GIVE_UP);
-		setisAlive(false);
+		setDead();
 		return;
 	}
 
@@ -136,7 +140,7 @@ void Iceman::doSomething() {
 		switch (ch)
 		{
 		case KEY_PRESS_ESCAPE:
-			setisAlive(false);
+			setDead();
 			break;
 		case KEY_PRESS_SPACE:
 			if (m_water_amnt > 0) {
@@ -282,7 +286,7 @@ void Boulder::doSomething() {
 		if (getWorld()->iceInFront(*this) || getWorld()->boulderInFront(*this)
 			|| getY() == 0)
 		{
-			this->setisAlive(false);
+			setDead();
 		}
 
 		break;
@@ -388,14 +392,14 @@ void Gold::doSomething() {
 		int itemY = this->getY();
 
 		if (getWorld()->icemanNearby(*this, itemX, itemY, 3.0)) {
-			this->setisAlive(false); // if the iceman is 3 units away, set the item to dead
+			setDead(); // if the iceman is 3 units away, set the item to dead
 			GameController::getInstance().playSound(this->getItemSound());
 			getWorld()->incIcemanItem('g');
 		}
 	}
 	if (this->getItemState() == temporary) {  //any item that is in a temporary state will come here and count down(dropped gold, sonar, water)
 		if (this->getitemTick() == 0) { //if the item has no tick left destroy it
-			this->setisAlive(false);
+			setDead();
 		}
 		this->decreaseTick();  //decrease tick
 	}
@@ -428,7 +432,7 @@ void Oil::doSomething() {
 		}
 	}
 	if (this->isVisible() && (getWorld()->icemanNearby(*this, this->getX(), this->getY(), 3.0))) {  //if the oil is visible to the player and close enough, pick it up
-		this->setisAlive(false); // if the iceman is 3 units away, set the item to dead
+		setDead(); // if the iceman is 3 units away, set the item to dead
 		GameController::getInstance().playSound(this->getItemSound());
 		getWorld()->incIcemanItem('o');  //increase the oil amnt
 	}
@@ -449,12 +453,12 @@ Sonar::~Sonar() {
 }
 void Sonar::doSomething() {
 	if (this->getitemTick() == 0) { //if the item has no tick left destroy it
-		this->setisAlive(false);
+		setDead();
 	}
 	int itemX = this->getX();
 	int itemY = this->getY();
 	if (getWorld()->icemanNearby(*this, itemX, itemY, 3.0)) { // if the iceman is 3 units away, set the item to dead
-		this->setisAlive(false);
+		setDead();
 		GameController::getInstance().playSound(this->getItemSound());
 		getWorld()->incIcemanItem('s');  //incrase the sonar amnt
 	}
@@ -477,12 +481,12 @@ Water:: ~Water() {
 
 void Water::doSomething() {
 	if (this->getitemTick() == 0) { //if the item has no tick left destroy it
-		this->setisAlive(false);
+		setDead();
 	}
 	int itemX = this->getX();
 	int itemY = this->getY();
 	if (getWorld()->icemanNearby(*this, itemX, itemY, 3.0)) { // if the iceman is 3 units away, set the item to dead
-		this->setisAlive(false);
+		setDead();
 		GameController::getInstance().playSound(this->getItemSound());
 		getWorld()->incIcemanItem('w');  //increase the water amnt
 	}
