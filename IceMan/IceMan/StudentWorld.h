@@ -39,7 +39,7 @@ public:
 	void createGold(int num);
 	void createSonar();
 	void createWater();
-	//void createProtestor();
+	void createProtestor();
 	//void createHardcoreProtestor();
 	//std::unique_ptr<Iceman> getPlayer() const; 
 
