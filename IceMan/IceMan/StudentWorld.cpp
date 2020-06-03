@@ -175,6 +175,7 @@ double StudentWorld::radius(int x1, int y1, int x2, int y2) {
 	return d;
 }
 
+
 bool StudentWorld::annoyNearbyPeople(const Actor& a, unsigned int hp)
 {
 	bool ans = false;
@@ -318,6 +319,87 @@ void StudentWorld::createProtestor() {
 	unique_ptr<RegularProtestor> protestor;
 	protestor = unique_ptr<RegularProtestor>(new RegularProtestor(this, 60, 60));
 	actors.emplace_back(std::move(protestor));
+}
+
+bool StudentWorld::icemanInSight(int x, int y) {
+	if (player->getX() == x || player->getY() == y) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+double StudentWorld::protestorRadius(int x, int y) {
+	double d = (sqrt(pow(player->getX() - x, 2) + pow(player->getY() - y, 2)));
+	return d;
+}
+GraphObject::Direction StudentWorld::getIcemanDirection() {
+	GraphObject::Direction x = player->getDirection();
+	return x;
+}
+GraphObject::Direction StudentWorld::faceIceman(int x, int y) {
+	if (player->getX() < x) {
+		return GraphObject::left;
+	}
+	if (player->getX() > x) {
+		return GraphObject::right;
+	}
+	if (player->getY() < y) {
+		return GraphObject::down;
+	}
+	if (player->getY() > y) {
+		return GraphObject::up;
+	}
+}
+bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: potential bug, all sorts of weird will do tmrw
+	int px = player->getX();
+	int py = player->getY();
+	if (px == x) {  //check row or col first then separate but length
+		if (py > y) { //if the player is higher then the protestor
+			int startY = y;
+			while (startY <= py) {
+				if (iceContainer[x][startY]) {
+					return false;
+				}
+				startY++;
+			}
+			return true;
+		}
+		else {
+			int startY = py;
+			while (startY <= y) {
+				if (iceContainer[x][startY]) {
+					return false;
+				}
+				startY++;
+			}
+			return true;
+		}
+
+	}
+	//other half
+	if (py == y){
+		if (px > x) {
+			int startX = x;
+			while (startX <= px) {
+				if (iceContainer[startX][y]) {
+					return false;
+				}
+				startX++;
+			}
+			return true;
+		}
+		else {
+			int startX = px;
+			while (startX <= px) {
+				if (iceContainer[startX][y]) {
+					return false;
+				}
+				startX++;
+			}
+			return true;
+		}
+	}
 }
 
 
