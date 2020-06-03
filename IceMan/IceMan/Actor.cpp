@@ -199,6 +199,7 @@ void Iceman::doSomething() {
 
 
 }
+
 void Iceman::gainGold() {
 	m_gold_amnt++;
 	getWorld()->increaseScore(10);
@@ -502,7 +503,7 @@ Person::Person(StudentWorld* world, int imageID, int startX, int startY, Directi
 	:Actor(world, imageID, startX, startY, dir, 1, 0)
 {
 	m_HP = health;
-
+	//player 
 }
 
 Person::~Person()
@@ -528,12 +529,14 @@ Protestor::Protestor(StudentWorld* world, int x, int y, int imageID, unsigned in
 {
 	m_leaveState = false;
 	rest_state = 0;
+	//player->getIceman();
+	m_distancetoTravel = 0;
+
 
 }
 
 Protestor::~Protestor()
-{
-}
+{}
 
 bool Protestor::annoy(unsigned int amt)
 {
@@ -549,6 +552,134 @@ bool Protestor::getIsLeaving()
 	return m_leaveState;
 }
 
+bool Protestor::oppositeDirection() {  //the cases are the protestors direction
+	Direction x = getWorld()->getIcemanDirection();
+	Direction dir = this->getDirection();
+	switch (dir) {
+	case(up):
+		if (x == down) {
+			return true;
+		}
+		else {
+			return false;
+		}
+		break;
+	case(down):
+		if (x == up) {
+			return true;
+		}
+		else {
+			return false;
+		}
+		break;
+	case(right):
+		if (x == left) {
+			return true;
+		}
+		else {
+			return false;
+		}
+		break;
+	case(left):
+		if (x == right) {
+			return true;
+		}
+		else {
+			return false;
+		}
+		break;
+	default:
+		return false;
+	}
+
+}
+void Protestor::moveProtestor() {
+	switch (this->getDirection()) {
+	case left:  //x-1
+		if (this->getX() > 0 && !(getWorld()->boulderInTheWay(*this)) && !(getWorld()->iceInFront(*this))) {
+			moveTo(this->getX() - 1, this->getY());
+		}
+		else {
+			this->m_distancetoTravel = 0;
+		}
+		break;
+	case right: //x+1
+		if (this->getX() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this)) && !(getWorld()->iceInFront(*this))) {
+			moveTo(getX() + 1, this->getY());
+		}
+		else {
+			this->m_distancetoTravel = 0;
+		}
+		break;
+	case down:  //y-1
+		if (this->getY() > 0 && !(getWorld()->boulderInTheWay(*this)) && !(getWorld()->iceInFront(*this))) {
+			moveTo(this->getX(), this->getY() - 1);
+		}
+		else {
+			this->m_distancetoTravel = 0;
+		}
+		break;
+	case up://y+1
+		if (this->getY() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this)) && !(getWorld()->iceInFront(*this))) {
+			moveTo(this->getX(), this->getY() + 1);
+		}
+		else {
+			this->m_distancetoTravel = 0;
+		}
+		break;
+
+	}
+}
+
+void Protestor::pickRandDirection(int protestorX, int protestorY) {
+	bool outofBounds;
+	do {
+		int direction = rand() % 4 + 1;
+
+		switch (direction) {
+		case 1: ///move up
+			this->setDirection(up);
+			if (protestorY + 1 >= MAX_WINDOW - 4) {
+				outofBounds = true;
+			}
+
+			else {
+				outofBounds = false;
+			}
+			break;
+		case 2: //move right
+			this->setDirection(right);
+			if (protestorX + 1 >= MAX_WINDOW - 4) {
+				outofBounds = true;
+			}
+			else {
+				outofBounds = false;
+			}
+			break;
+		case 3: //move down
+			this->setDirection(down);
+			if (protestorY - 1 <= 0) {
+				outofBounds = true;
+			}
+			else {
+				outofBounds = false;
+			}
+			break;
+		case 4: //move left
+			this->setDirection(left);
+			if (protestorX - 1 <= 0) {
+				outofBounds = true;
+			}
+			else {
+				outofBounds = false;
+			}
+			break;
+		}
+
+	} while (getWorld()->iceInFront(*this) || getWorld()->boulderInFront(*this) || outofBounds == true);
+
+
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////REGULAR//////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -556,20 +687,155 @@ RegularProtestor::RegularProtestor(StudentWorld* world, int x, int y)
 	:Protestor(world, x, y, IID_PROTESTER, 5)
 {
 	m_ticksWait = std::max(0, 3 - static_cast<int>(getWorld()->getLevel()) / 4);
+	m_shout = 0;
 }
-
+int RegularProtestor::numSquaresToMoveInCurrentDirection() {
+	return rand() % 53 + 8;     // 8-60
+}
 void RegularProtestor::doSomething() {
 	if (!this->getIsAlive()) { //1
 		return;
 	}
 	if (this->rest_state != m_ticksWait) { //2
-		this->rest_state;
+		this->rest_state++;
 		return;
 	}
-	//if (getIsLeaving()) {
+	int protestorX = this->getX();
+	int protestorY = this->getY();
+	if (getIsLeaving()) { //3
+		if (protestorX == 60 && protestorY == 60) {
+			this->setDead();
+		}
+	}
+	if (rest_state == m_ticksWait) {  //once the waiting time is over
+		//4
+		if (getWorld()->icemanNearby(*this, protestorX, protestorY, 4.0) && oppositeDirection()) {
+			if (m_shout == 0) { //protestor has not shoulted in the last non resting 15 ticks
+				m_shout = 15;
+				GameController::getInstance().playSound(SOUND_PROTESTER_YELL);
+				//inform the iceman that he been annoyed for a totoal of 2 annoynace points
+				return;  //return immediatly
+			}
+		}
+		//5 straight hor or ver line of sight from iceman, 4 untis away from iceman, TODO:: can move to iceman
+		if (getWorld()->icemanInSight(protestorX, protestorY) && getWorld()->
+			protestorRadius(protestorX, protestorY) >=4.0 && getWorld()->canReachIceman(protestorX, protestorY)) {
+			Direction dir = getWorld()->faceIceman(protestorX, protestorY);
+			this->setDirection(dir);  //Change its direction to face in the direction of the Iceman]
+			this->moveProtestor();//then take one step toward iceman (done on 8)
+			m_distancetoTravel = 0;
+			rest_state = 0;
+			return;
+		}
+		//6 iceman not in sight
+		else {
+			m_distancetoTravel--; //decrement numSquaresToMoveInCurrentDirection
+			//bool outofBounds;
+			if (m_distancetoTravel <= 0) {
+				pickRandDirection(protestorX,protestorY);
+				this->moveProtestor();
+				if (m_distancetoTravel <= 0) {
+					m_distancetoTravel = numSquaresToMoveInCurrentDirection();
 
-	//}
-	//rest_state = 0;
+				}
+				//	do {
+				//		int direction = rand() % 4 + 1;
+
+				//		switch (direction) {
+				//		case 1: ///move up
+				//			this->setDirection(up);
+				//			if (protestorY + 1 >= MAX_WINDOW - 4) {
+				//				outofBounds = true;
+				//			}
+
+				//			else {
+				//				outofBounds = false;
+				//			}
+				//			break;
+				//		case 2: //move right
+				//			this->setDirection(right);
+				//			if (protestorX + 1 >= MAX_WINDOW - 4) {
+				//				outofBounds = true;
+				//			}
+				//			else {
+				//				outofBounds = false;
+				//			}
+				//			break;
+				//		case 3: //move down
+				//			this->setDirection(down);
+				//			if (protestorY - 1 <= 0) {
+				//				outofBounds = true;
+				//			}
+				//			else {
+				//				outofBounds = false;
+				//			}
+				//			break;
+				//		case 4: //move left
+				//			this->setDirection(left);
+				//			if (protestorX - 1 <= 0) {
+				//				outofBounds = true;
+				//			}
+				//			else {
+				//				outofBounds = false;
+				//			}
+				//			break;
+				//		}
+
+				//	} while (getWorld()->iceInFront(*this) || getWorld()->boulderInFront(*this) || outofBounds == true);
+
+
+				//}
+			}
+
+		}
+		//7
+
+		//8  actual movement
+		this->moveProtestor();
+		//switch (getDirection()) {
+		//case left:  //x-1
+		//	if (getX() > 0 && !(getWorld()->boulderInTheWay(*this)) && !(getWorld()->iceInFront(*this))) {
+		//		moveTo(getX() - 1, getY());
+		//	}
+		//	else {
+		//		m_distancetoTravel = 0;
+		//	}
+		//	break;
+		//case right: //x+1
+		//	if (getX() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this)) && !(getWorld()->iceInFront(*this))) {
+		//		moveTo(getX() + 1, getY());
+		//	}
+		//	else {
+		//		m_distancetoTravel = 0;
+		//	}
+		//	break;
+		//case down:  //y-1
+		//	if (getY() > 0 && !(getWorld()->boulderInTheWay(*this)) && !(getWorld()->iceInFront(*this))) {
+		//		moveTo(getX(), getY() - 1);
+		//	}
+		//	else {
+		//		m_distancetoTravel = 0;
+		//	}
+		//	break;
+		//case up://y+1
+		//	if (getY() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this)) && !(getWorld()->iceInFront(*this))) {
+		//		moveTo(getX(), getY() + 1);
+		//	}
+		//	else {
+		//		m_distancetoTravel = 0;
+		//	}
+		//	break;
+
+		//}
+
+	}
+	m_distancetoTravel--;
+	rest_state = 0;
+	if (m_shout != 0) {
+		m_shout--;
+	}
+	
+
 }
 
 void RegularProtestor::gainGold() {}
@@ -579,4 +845,5 @@ void RegularProtestor::gainGold() {}
 HardcoreProtestor::HardcoreProtestor(StudentWorld* world, int x, int y)
 	:Protestor(world, x, y, IID_HARD_CORE_PROTESTER, 20)
 {
+
 }
