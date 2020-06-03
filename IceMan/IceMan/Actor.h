@@ -199,11 +199,16 @@ public:
 
 	//getters
 	bool getIsLeaving();
+	bool oppositeDirection();
+	void moveProtestor();
+	void pickRandDirection(int protestorX, int protestorY);
 protected:
 
 	bool m_leaveState; //starts out in a Not leave the oil state (false)
 	int m_ticksWait;
 	int rest_state;
+	int m_distancetoTravel;
+	int m_shout;
 
 };
 
@@ -213,6 +218,7 @@ public:
 	RegularProtestor(StudentWorld* world, int x, int y);
 	void doSomething();
 	void gainGold();
+	int numSquaresToMoveInCurrentDirection();
 
 private:
 
