@@ -16,6 +16,7 @@ class Ice;
 class Iceman;
 class Boulder;
 class Gold;
+class Protestor;
 
 class StudentWorld : public GameWorld    //inherited from public gameworld
 {
@@ -60,6 +61,13 @@ public:
 	void placeGold(int x, int y);
 	void createNewItem();
 	void useSonar();
+	//added
+	bool icemanInSight(int x , int y);
+	double protestorRadius(int x, int y);
+	GraphObject::Direction getIcemanDirection();
+	GraphObject::Direction faceIceman(int x, int y);
+	bool canReachIceman(int x, int y);
+
 
 	int generateRandX();
 	int generateRandY();
@@ -102,6 +110,7 @@ public:
 		createBoulder(lvlBoulder());
 		createOil(lvlOil());
 		createGold(lvlGold());
+		createProtestor();
 		return GWSTATUS_CONTINUE_GAME;
 	}
 
