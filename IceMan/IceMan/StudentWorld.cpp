@@ -351,14 +351,15 @@ GraphObject::Direction StudentWorld::faceIceman(int x, int y) {
 		return GraphObject::up;
 	}
 }
-bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: potential bug, all sorts of weird will do tmrw
+bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out the boulder issue
 	int px = player->getX();
 	int py = player->getY();
 	if (px == x) {  //check row or col first then separate but length
 		if (py > y) { //if the player is higher then the protestor
 			int startY = y;
 			while (startY <= py) {
-				if (iceContainer[x][startY]) {
+				if (iceContainer[x][startY])  // TODO:: account for boulders
+				{
 					return false;
 				}
 				startY++;
@@ -368,7 +369,7 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: potential bug, all s
 		else {
 			int startY = py;
 			while (startY <= y) {
-				if (iceContainer[x][startY]) {
+				if (iceContainer[x][startY]) { // TODO:: account for boulders
 					return false;
 				}
 				startY++;
@@ -401,7 +402,75 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: potential bug, all s
 		}
 	}
 }
-
+bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
+	int e = player->getX();
+	int q = player->getY();
+	switch (r) {
+	case GraphObject::up:
+	case GraphObject::down:
+		//THE ICE IS 3 PIXELS WIDE BUT ICEMAN DETECTS THE FIRST PIXEL OF THE TUNNEL
+		for (int r = x; r < x + 3; r++) {
+			if (iceContainer[r + 1][y] || iceContainer[r - 1][y]) {
+				return false;
+			}
+		}
+		return true;
+		break;
+	case GraphObject::left:
+	case GraphObject::right:
+		for (int k = x; k < x+4; k++) {
+			for (int p = y; p < y+4; p++) {
+				if (iceContainer[k][p]) {
+					return false;
+				}
+			}
+		}
+		return false;
+		break;
+	}
+}
+GraphObject::Direction StudentWorld::makeTurn(int x, int y, GraphObject::Direction r) {
+	switch (r) {
+	case GraphObject::up:
+	case GraphObject::down:
+		//if there is no ice on the right and bottom  TODO:: account for boulders
+		if (!iceContainer[x + 1][y] && !iceContainer[x - 1][y]) {
+			int choice = rand() % 2;
+			if (choice == 0) {
+				return GraphObject::right;
+			}
+			if (choice == 1) {
+				return GraphObject::left;
+			}
+		}
+		if (!iceContainer[x + 1][y]) {
+			return GraphObject::right;
+		}
+		if (!iceContainer[x - 1][y]) {
+			return GraphObject::left;
+		}
+		break;
+	case GraphObject::left:
+	case GraphObject::right:
+		//TODO::account for boulders
+		if (!iceContainer[x][y + 1] && !iceContainer[x][y - 1]) {
+			int choice = rand() % 2;
+			if (choice == 0) {
+				return GraphObject::up;
+			}
+			if (choice == 1) {
+				return GraphObject::down;
+			}
+		}
+		if (!iceContainer[x][y+1]) {
+			return GraphObject::up;
+		}
+		if (!iceContainer[x][y-1]) {
+			return GraphObject::down;
+		}
+		break;
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////SQUIRT///////////////////////////////////////////////
