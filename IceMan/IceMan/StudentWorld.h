@@ -67,7 +67,8 @@ public:
 	GraphObject::Direction getIcemanDirection();
 	GraphObject::Direction faceIceman(int x, int y);
 	bool canReachIceman(int x, int y);
-
+	bool canTurn(int x, int y, GraphObject::Direction r);
+	GraphObject::Direction makeTurn(int x, int y, GraphObject::Direction r);
 
 	int generateRandX();
 	int generateRandY();
