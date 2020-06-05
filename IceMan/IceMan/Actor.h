@@ -202,6 +202,7 @@ public:
 	bool oppositeDirection();
 	void moveProtestor();
 	void pickRandDirection(int protestorX, int protestorY);
+	bool cannotMove();
 protected:
 
 	bool m_leaveState; //starts out in a Not leave the oil state (false)
@@ -209,6 +210,7 @@ protected:
 	int rest_state;
 	int m_distancetoTravel;
 	int m_shout;
+	int  m_perpendicular_tick;
 
 };
 
