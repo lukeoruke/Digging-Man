@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <sstream>
 
 const int MAX_WINDOW = 64;
 
@@ -79,7 +80,8 @@ public:
 
 	void setDisplayText();
 	std::string formatStats(unsigned int level, unsigned int lives, int health, int squirts, int gold, int barrelsLeft, int sonar, int score);
-
+	std::string ZeroPadNumber(int num);
+	std::string SpacePadNumber(int num, int pad);
 	//getters
 	StudentWorld* getStudentWorld();
 	int getBouldersLeft() const;
