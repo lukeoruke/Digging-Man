@@ -63,13 +63,16 @@ public:
 	void createNewItem();
 	void useSonar();
 	//added
-	bool icemanInSight(int x , int y);
+	bool icemanInSight(int x, int y);
 	double protestorRadius(int x, int y);
 	GraphObject::Direction getIcemanDirection();
 	GraphObject::Direction faceIceman(int x, int y);
 	bool canReachIceman(int x, int y);
 	bool canTurn(int x, int y, GraphObject::Direction r);
 	GraphObject::Direction makeTurn(int x, int y, GraphObject::Direction r);
+	int leaveField(int x, int y);
+	int findPath(int x, int y);
+	void createGold();
 
 	int generateRandX();
 	int generateRandY();
