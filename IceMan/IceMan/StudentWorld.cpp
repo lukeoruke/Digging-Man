@@ -405,56 +405,198 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out th
 bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 	int e = player->getX();
 	int q = player->getY();
+
 	switch (r) {
 	case GraphObject::up:
-	case GraphObject::down:
-		//THE ICE IS 3 PIXELS WIDE BUT ICEMAN DETECTS THE FIRST PIXEL OF THE TUNNEL
-		for (int r = x; r < x + 3; r++) {
-			if (iceContainer[r + 1][y] || iceContainer[r - 1][y]) {
+		if (x + 1 == 61) { //if the protestor is to the very right
+			if ((!iceContainer[x-1][y] && !iceContainer[x-1][y+3])) {
+				return true;
+			}
+			else {
 				return false;
 			}
 		}
-		return true;
-		break;
-	case GraphObject::left:
-	case GraphObject::right:
-		for (int k = x; k < x+4; k++) {
-			for (int p = y; p < y+4; p++) {
-				if (iceContainer[k][p]) {
-					return false;
-				}
+		if (x - 1 == -1) { // if the protestor is to the very left
+			if ((!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3])) {
+				return true;
+			}
+			else {
+				return false;
 			}
 		}
-		return false;
+		//if there is not ice to the right or left of protestor
+		if (!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3]) { //no ice to the right
+				return true;
+		}
+		if ((!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3])) { //no ice to the left
+				return true;
+		}
+		else {
+			return false;
+		}
+		break;
+	case GraphObject::down: //FIXEDS
+		if (x + 1 == 61) { //if the protestor is to the very right
+			if (!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3]) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		if (x - 1 == -1) { // if the protestor is to the very left
+			if ((!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3])) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		//if there is no ice to the right or left of the protestor return true
+		if (!(y + 3 > 60)) { //starts counting from 57
+			if (!iceContainer[x+4][y] && !iceContainer[x + 4][y + 3]) { // no ice to the right 
+				return true;
+			}
+			if ((!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3])) { // no ice to the left
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+		break;
+	case GraphObject::left:
+		if (y + 1 == 61) { //if the protestor is at max height of the game
+			if ((!iceContainer[x][y-1] && !iceContainer[x+3][y-1]))  {   //checks below
+				return true;
+			}
+			else {	
+				return false;
+			}
+		}
+		if (y - 1 == -1) {  //if the protestor is at min height of the game
+			if ((!iceContainer[x][y + 4] && !iceContainer[x + 3][y + 4])) { //checks above
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		//if there is not ice to the top or bottom of protestor TODO:: Check if these are right
+		if (!iceContainer[x][y-1] && !iceContainer[x+3][y-1]){ //no ice below him
+			return true;
+		}
+		if (!iceContainer[x][y+4] && !iceContainer[x+3][y+4]) { //no ice above him
+			return true;
+		}
+		else {
+			return false;
+		}
+		break;
+	case GraphObject::right:
+		if (y + 1 == 61) { //if the protestor is at max height of the game
+			if ((!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1])) { //checks below
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		if (y - 1 == -1) { //if the protestor is at min height of the game
+			if (!iceContainer[x][y + 1] && !iceContainer[x + 3][y + 1]) { //checks above him
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		//if there is not ice to the top or bottom of protestor
+		if (!iceContainer[x][y-1] && !iceContainer[x+3][y-1]) { //no ice below him
+			return true;
+		}
+		if (!iceContainer[x][y+4] && !iceContainer[x+3][y+4]) {
+			return true;
+		}
+		else {
+			return false;
+		}
 		break;
 	}
+
 }
 GraphObject::Direction StudentWorld::makeTurn(int x, int y, GraphObject::Direction r) {
+	int choice = rand() % 2;
 	switch (r) {
 	case GraphObject::up:
-	case GraphObject::down:
-		//if there is no ice on the right and bottom  TODO:: account for boulders
-		if (!iceContainer[x + 1][y] && !iceContainer[x - 1][y]) {
-			int choice = rand() % 2;
-			if (choice == 0) {
-				return GraphObject::right;
-			}
-			if (choice == 1) {
+		if (x + 1 == 61) { //checks the left
+			if ((!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3])) {
 				return GraphObject::left;
 			}
 		}
-		if (!iceContainer[x + 1][y]) {
+		if (x - 1 == -1) { // checkst the right
+			if ((!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3])) {
+				return GraphObject::right;
+			}
+		}
+		if (!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3] && (!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3])) {
+			if (choice == 0) {
+				return GraphObject::left;
+			}
+			if (choice == 1) {
+				return GraphObject::right;
+			}
+		}
+		if (!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3]) {
+			return GraphObject::left;
+		}
+		if (!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3]) {
 			return GraphObject::right;
 		}
-		if (!iceContainer[x - 1][y]) {
+		break;
+	case GraphObject::down:
+		if (x + 1 == 61) { //if the protestor is to the very right
+			if (!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3]) {
+				return GraphObject::left;
+			}
+		}
+		if (x - 1 == -1) { // if the protestor is to the very left
+			if ((!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3])) {
+				return GraphObject::right;
+			}
+		}
+		//if there is no ice to the right or left of the protestor return 50/50
+		if (!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3] && (!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3])) {
+			if (choice == 0) {
+				return GraphObject::left;
+			}
+			if (choice == 1) {
+				return GraphObject::right;
+			}
+		}
+		//if there is no ice to the right
+		if (!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3]) {
+			return GraphObject::right;
+		}
+		//if there is no ice to the left
+		if ((!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3])) {
 			return GraphObject::left;
 		}
 		break;
 	case GraphObject::left:
-	case GraphObject::right:
-		//TODO::account for boulders
-		if (!iceContainer[x][y + 1] && !iceContainer[x][y - 1]) {
-			int choice = rand() % 2;
+		if (y + 1 == 61) {
+			if (!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1]) { //checks below
+				return GraphObject::down;
+			}
+		}
+		if (y - 1 == -1) {
+			if ((!iceContainer[x][y + 4] && !iceContainer[x + 3][y + 4])) { //chekcs above
+				return GraphObject::up;
+			}
+		}
+		if (!iceContainer[x][y-1] && !iceContainer[x + 3][y - 1] && (!iceContainer[x][y+4] && !iceContainer[x+3][y + 4])) { // if both up/down are open,pick one
 			if (choice == 0) {
 				return GraphObject::up;
 			}
@@ -462,11 +604,38 @@ GraphObject::Direction StudentWorld::makeTurn(int x, int y, GraphObject::Directi
 				return GraphObject::down;
 			}
 		}
-		if (!iceContainer[x][y+1]) {
+		//if only above or below is open, pick accordingly
+		if (!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1]) {
+			GraphObject::down;
+		}
+		if ((!iceContainer[x][y + 4] && !iceContainer[x + 3][y + 4])) {
 			return GraphObject::up;
 		}
-		if (!iceContainer[x][y-1]) {
+		break;
+	case GraphObject::right:
+		if (y + 1 == 61) { 
+			if ((!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1])) {
+				return GraphObject::down;
+			}
+		}
+		if (y - 1 == -1) { 
+			if (!iceContainer[x][y + 4] && !iceContainer[x + 3][y + 4]) {
+				return GraphObject::up;
+			}
+		}
+		if (!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1] && (!iceContainer[x][y + 4] && !iceContainer[x + 3][y + 4])) {
+			if (choice == 0) {
+				return GraphObject::up;
+			}
+			if (choice == 1) {
+				return GraphObject::down;
+			}
+		}
+		if (!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1]) {
 			return GraphObject::down;
+		}
+		if (!iceContainer[x][y + 4] && !iceContainer[x + 3][y + 4]) {
+			return GraphObject::up;
 		}
 		break;
 	}
