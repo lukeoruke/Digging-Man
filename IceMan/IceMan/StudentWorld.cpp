@@ -640,33 +640,63 @@ GraphObject::Direction StudentWorld::makeTurn(int x, int y, GraphObject::Directi
 		break;
 	}
 }
-//void StudentWorld::createGrid() {
-//	for (int row = 0; row < MAX_WINDOW; row++) {
-//		for (int col = 0; col < MAX_WINDOW - 4; col++) {
-//			if (row < TUNNEL_COL_START || row > TUNNEL_COL_END || col < TUNNEL_ROW) {
-//				grid[row][col] = 10'000;
-//			}
-//		}
-//	}
-//
-//}
-//int StudentWorld::findPath(int proX, int proY) {
-//	grid[60][60] == 0;
-//	while (!grid[proX][proY]) {
-//
-//	}
-//	return 989;
-//}
-//
-//int StudentWorld::leaveField(int proX, int proY) {  //use threads to search multiple places at once
-//	vector<int> options;
-//	for (int r = 0; r < 4; r++) {
-//		auto ft = async(launch::async, [&] {return findPath(proX,proY); });
-//		int steps = ft.get();
-//		options.push_back(steps);
-//	}
-//	return 0;
-//}
+gridQueue::gridQueue(int x, int y) {
+	m_x = x;
+	m_y = y;
+}
+int gridQueue::getGridX() {
+	return m_x;
+}
+int gridQueue::getGridY() {
+	return m_y;
+}
+void StudentWorld::createGrid() {
+	for (int row = 0; row < MAX_WINDOW; row++) {
+		for (int col = 0; col < MAX_WINDOW - 4; col++) {
+			if (row < TUNNEL_COL_START || row > TUNNEL_COL_END || col < TUNNEL_ROW) {
+				if (iceContainer[row][col]) { //if there is ice or boulder, it is unreachable
+					grid[row][col] == 100000;
+				}
+				else {
+					grid[row][col] = 1000; //if there is open space
+				}
+			}
+		}
+	}
+
+}
+int StudentWorld::findPath(int proX, int proY) {
+	createGrid();
+	tree.push(gridQueue(60, 60));
+	int distance = 0;
+	int row = 60;
+	int col = 60;
+	while (!tree.empty()) {
+		gridQueue guess = tree.front();
+		tree.pop();
+		if (guess.getGridX() != proX &&  guess.getGridY() != proY) {
+			if (grid[row][col] == 1000) {
+				grid[row][col] == distance;
+			}
+			tree.push(gridQueue(row, col + 1));
+			tree.push(gridQueue(row + 1, col));
+			tree.push(gridQueue(row, col - 1));
+			tree.push(gridQueue(row - 1, col));
+			
+		}
+	}
+	return 989;
+}
+
+int StudentWorld::leaveField(int proX, int proY) {  //use threads to search multiple places at once
+	vector<int> options;
+	for (int r = 0; r < 4; r++) {
+		auto ft = async(launch::async, [&] {return findPath(proX,proY); });
+		int steps = ft.get();
+		options.push_back(steps);
+	}
+	return 0;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////SQUIRT///////////////////////////////////////////////
