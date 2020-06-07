@@ -680,6 +680,7 @@ void Protestor::pickRandDirection(int protestorX, int protestorY) {
 
 
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////REGULAR//////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -713,10 +714,12 @@ void RegularProtestor::doSomething() {
 		if (protestorX == 60 && protestorY == 60){ //a
 			this->setDead();
 		}
+		//getWorld()->leaveField();
+
 
 	}
 	if (rest_state == m_ticksWait) {  //once the waiting time is over
-		//4
+		//4 DONE
 		if (getWorld()->icemanNearby(*this, protestorX, protestorY, 4.0) && oppositeDirection()) {
 			if (m_shout == 0) { //protestor has not shoulted in the last non resting 15 ticks
 				m_shout = 15;
@@ -725,7 +728,7 @@ void RegularProtestor::doSomething() {
 				return;  //return immediatly
 			}
 		}
-		//5 straight hor or ver line of sight from iceman, 4 untis away from iceman
+		//5 straight hor or ver line of sight from iceman, 4 untis away from iceman DONE
 		if (getWorld()->icemanInSight(protestorX, protestorY) && getWorld()->
 			protestorRadius(protestorX, protestorY) >=4.0 && getWorld()->canReachIceman(protestorX, protestorY) && !getWorld()->boulderInFront(*this)) {
 			Direction dir = getWorld()->faceIceman(protestorX, protestorY);
@@ -735,7 +738,7 @@ void RegularProtestor::doSomething() {
 			rest_state = 0;
 			return;
 		}
-		//6 iceman not in sight
+		//6 iceman not in sight DONE
 		else {
 			m_distancetoTravel--; //decrement numSquaresToMoveInCurrentDirection
 			if (m_distancetoTravel <= 0) {
@@ -747,7 +750,7 @@ void RegularProtestor::doSomething() {
 				}
 			}
 		}
-		//7 
+		//7  DONE
 		if (getWorld()->canTurn(protestorX, protestorY,this->getDirection())) {
 			if (m_perpendicular_tick <= 0) {
 				//set the direction to the selected perp. direction
@@ -768,14 +771,14 @@ void RegularProtestor::doSomething() {
 		//8  actual movement
 		this->moveProtestor();
 	}
-	//9
+	//9 DONE
 	m_distancetoTravel--;
 	rest_state = 0;
 	if (m_shout != 0) {
 		m_shout--;
 	}
-	
-
+	//this line is just testing
+	//getWorld()->leaveField(protestorX, protestorY);
 }
 
 void RegularProtestor::gainGold() {}
