@@ -930,14 +930,14 @@ int StudentWorld::getWaterLeft() const {
 //pg 22
 string StudentWorld::formatStats(unsigned int level, unsigned int lives, int health, int squirts, int gold, int barrelsLeft, int sonar, int score)
 {
-	string s_level = "Lvl: " + to_string(level) + "  ";
+	string s_level = "Lvl: " + SpacePadNumber(level, 2) + "  ";
 	string s_lives = "Lives: " + to_string(lives) + "  ";
-	string s_health = "Hlth:  " + to_string(health) + "%  ";
-	string s_squirt = "Wtr:  " + to_string(squirts) + "  ";
-	string s_gold = "Gld:  " + to_string(gold) + "  ";
-	string s_barrel = "Oil Left:  " + to_string(barrelsLeft) + "  ";
-	string s_sonar = "Sonar:  " + to_string(sonar) + "  ";
-	string s_score = "Scr:  " + to_string(score);         //TODO: MAKE THIS DISPLAY 6 DIGITS
+	string s_health = "Hlth: " + SpacePadNumber(health, 3) + "%  ";
+	string s_squirt = "Wtr: " + SpacePadNumber(squirts, 2) + "  ";
+	string s_gold = "Gld: " + SpacePadNumber(gold, 2) + "  ";
+	string s_barrel = "Oil Left: " + SpacePadNumber(barrelsLeft, 2) + "  ";
+	string s_sonar = "Sonar: " + SpacePadNumber(sonar, 2) + "  ";
+	string s_score = "Scr: " + ZeroPadNumber(score);
 
 	string display = s_level + s_lives + s_health + s_squirt + s_gold + s_barrel + s_sonar + s_score;
 	return display;
@@ -957,4 +957,36 @@ void StudentWorld::setDisplayText() {
 	string s = formatStats(level, lives, health, squirts, gold, barrelsLeft, sonar, score);
 	// Finally, update the display text at the top of the screen with your newly created stats 
 	setGameStatText(s); // calls our provided GameWorld::setGameStatText
+}
+
+string StudentWorld::ZeroPadNumber(int num)
+{
+	// stringstream conversion int to string
+	stringstream s;
+
+	s << num;
+	string ans;
+	s >> ans;
+
+	// Append zeros
+	int length = ans.length();
+	for (int i = 0; i < 6 - length; i++)
+		ans = "0" + ans;
+	return ans;
+}
+
+string StudentWorld::SpacePadNumber(int num, int pad)
+{
+	// stringstream conversion int to string
+	stringstream s;
+
+	s << num;
+	string ans;
+	s >> ans;
+
+	// Append spaces
+	int length = ans.length();
+	for (int i = 0; i < pad - length; i++)
+		ans = " " + ans;
+	return ans;
 }
