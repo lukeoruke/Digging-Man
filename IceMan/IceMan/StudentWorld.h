@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 #include <sstream>
+#include <queue>
 
 const int MAX_WINDOW = 64;
 
@@ -18,7 +19,16 @@ class Iceman;
 class Boulder;
 class Gold;
 class Protestor;
+struct gridQueue {
+public:
+	gridQueue(int x, int y);
+	int getGridX();
+	int getGridY();
 
+private:
+	int m_x;
+	int m_y;
+};
 class StudentWorld : public GameWorld    //inherited from public gameworld
 {
 public:
@@ -72,7 +82,7 @@ public:
 	GraphObject::Direction makeTurn(int x, int y, GraphObject::Direction r);
 	int leaveField(int x, int y);
 	int findPath(int x, int y);
-	void createGold();
+	void createGrid();
 
 	int generateRandX();
 	int generateRandY();
@@ -129,6 +139,7 @@ private:
 	//Ice* ice; //purpose?
 	//StudentWorld* world; //purpose?
 	std::unique_ptr<Ice> iceContainer[MAX_WINDOW][MAX_WINDOW];
+	int grid[MAX_WINDOW][MAX_WINDOW];
 	std::unique_ptr<Iceman> player;
 	std::vector<std::unique_ptr<Actor>> actors;
 	int m_bouldersLeft;
@@ -136,7 +147,8 @@ private:
 	int m_oilleft;
 	int m_sonarleft;
 	int m_waterleft;
-
+	std::queue<gridQueue> tree;
 };
+
 
 #endif // STUDENTWORLD_H_
