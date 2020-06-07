@@ -4,6 +4,7 @@
 #include <memory>
 #include <algorithm>
 #include <vector>
+#include <sstream>
 using namespace std;
 
 const int TUNNEL_COL_START = 30;
