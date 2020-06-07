@@ -354,10 +354,10 @@ GraphObject::Direction StudentWorld::faceIceman(int x, int y) {
 bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out the boulder issue
 	int px = player->getX();
 	int py = player->getY();
-	if (px == x) {  //check row or col first then separate but length
+	if (px == x) {  //if the protestor and iceman have the same X coord
 		if (py > y) { //if the player is higher then the protestor
 			int startY = y;
-			while (startY <= py) {
+			while (startY < py) {
 				if (iceContainer[x][startY])  // TODO:: account for boulders
 				{
 					return false;
@@ -368,7 +368,7 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out th
 		}
 		else {
 			int startY = py;
-			while (startY <= y) {
+			while (startY < y) {
 				if (iceContainer[x][startY]) { // TODO:: account for boulders
 					return false;
 				}
@@ -379,10 +379,10 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out th
 
 	}
 	//other half
-	if (py == y){
+	if (py == y){//if the protestor and iceman have the same Y coord
 		if (px > x) {
 			int startX = x;
-			while (startX <= px) {
+			while (startX < px) {
 				if (iceContainer[startX][y]) {
 					return false;
 				}
@@ -392,7 +392,7 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out th
 		}
 		else {
 			int startX = px;
-			while (startX <= px) {
+			while (startX < x) {
 				if (iceContainer[startX][y]) {
 					return false;
 				}
