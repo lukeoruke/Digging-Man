@@ -778,7 +778,7 @@ void RegularProtestor::doSomething() {
 		m_shout--;
 	}
 	//this line is just testing
-	//getWorld()->leaveField(protestorX, protestorY);
+	getWorld()->leaveField(protestorX, protestorY);
 }
 
 void RegularProtestor::gainGold() {}
