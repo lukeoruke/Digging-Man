@@ -4,7 +4,7 @@
 #include <memory>
 #include <algorithm>
 #include <vector>
-#include <sstream>
+#include <future>
 using namespace std;
 
 const int TUNNEL_COL_START = 30;
@@ -245,7 +245,6 @@ void StudentWorld::createIce() {
 			}
 		}
 	}
-
 }
 //checks whether the pixel around it is a ice block
 bool StudentWorld::iceInFront(const Actor& a) {
@@ -641,6 +640,33 @@ GraphObject::Direction StudentWorld::makeTurn(int x, int y, GraphObject::Directi
 		break;
 	}
 }
+//void StudentWorld::createGrid() {
+//	for (int row = 0; row < MAX_WINDOW; row++) {
+//		for (int col = 0; col < MAX_WINDOW - 4; col++) {
+//			if (row < TUNNEL_COL_START || row > TUNNEL_COL_END || col < TUNNEL_ROW) {
+//				grid[row][col] = 10'000;
+//			}
+//		}
+//	}
+//
+//}
+//int StudentWorld::findPath(int proX, int proY) {
+//	grid[60][60] == 0;
+//	while (!grid[proX][proY]) {
+//
+//	}
+//	return 989;
+//}
+//
+//int StudentWorld::leaveField(int proX, int proY) {  //use threads to search multiple places at once
+//	vector<int> options;
+//	for (int r = 0; r < 4; r++) {
+//		auto ft = async(launch::async, [&] {return findPath(proX,proY); });
+//		int steps = ft.get();
+//		options.push_back(steps);
+//	}
+//	return 0;
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////SQUIRT///////////////////////////////////////////////
