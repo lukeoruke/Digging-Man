@@ -739,7 +739,7 @@ void RegularProtestor::doSomething() {
 			rest_state = 0;
 			return;
 		}
-		//6 iceman not in sight
+		//6 iceman not in sight  TODO:: when hes not moving
 		else {
 			m_distancetoTravel--; //decrement numSquaresToMoveInCurrentDirection
 			//bool outofBounds;
@@ -760,7 +760,11 @@ void RegularProtestor::doSomething() {
 				this->setDirection(getWorld()->makeTurn(protestorX, protestorY, this->getDirection()));
 				//pick a new value for numSquares
 				m_distancetoTravel = numSquaresToMoveInCurrentDirection();
+				
 				m_perpendicular_tick = 200;
+			}
+			else {
+				m_perpendicular_tick--;
 			}
 		}
 		else {
