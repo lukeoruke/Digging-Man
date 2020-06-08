@@ -90,7 +90,7 @@ void Squirt::doSomething() {
 	if (getWorld()->annoyNearbyPeople(*this, 2)) {
 		setDead();
 	}
-	else if (m_travel_distance > 0 && !getWorld()->iceInFront(*this) && !getWorld()->boulderInFront(*this)) {
+	else if (m_travel_distance > 0 && !getWorld()->iceInFront(*this) && !getWorld()->boulderInTheWay(*this, 1)) {
 		moveInDirection();
 		m_travel_distance--;
 
@@ -146,7 +146,7 @@ void Iceman::doSomething() {
 			if (m_water_amnt > 0) {
 				GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);
 				m_water_amnt--;
-				if (!(getWorld()->iceInFront(*this)) && !(getWorld()->boulderInTheWay(*this))) {  //if there is ice in front, don't fire the water. same logic but for boulder
+				if (!(getWorld()->iceInFront(*this)) && !(getWorld()->boulderInTheWay(*this, 4))) {  //if there is ice in front, don't fire the water. same logic but for boulder
 					if (getWorld()->isRoomInFront(*this))
 					{
 						getWorld()->createSquirt(*this);
@@ -158,25 +158,25 @@ void Iceman::doSomething() {
 		case KEY_PRESS_LEFT:  //x-1
 			if (getDirection() != left)
 				setDirection(left);
-			else if (getX() > 0 && !(getWorld()->boulderInTheWay(*this)))
+			else if (getX() > 0 && !(getWorld()->boulderInTheWay(*this, 1)))
 				moveTo(getX() - 1, getY());
 			break;
 		case KEY_PRESS_RIGHT: //x+1
 			if (getDirection() != right)
 				setDirection(right);
-			else if (getX() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this)))
+			else if (getX() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this, 1)))
 				moveTo(getX() + 1, getY());
 			break;
 		case KEY_PRESS_DOWN:  //y-1
 			if (getDirection() != down)
 				setDirection(down);
-			else if (getY() > 0 && !(getWorld()->boulderInTheWay(*this)))
+			else if (getY() > 0 && !(getWorld()->boulderInTheWay(*this, 1)))
 				moveTo(getX(), getY() - 1);
 			break;
 		case KEY_PRESS_UP: //y+1
 			if (getDirection() != up)
 				setDirection(up);
-			else if (getY() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this)))
+			else if (getY() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this, 1)))
 				moveTo(getX(), getY() + 1);
 			break;
 		case KEY_PRESS_TAB:
@@ -557,51 +557,11 @@ bool Protestor::getIsLeaving()
 	return m_leaveState;
 }
 
-bool Protestor::oppositeDirection() {  //the cases are the protestors direction
-	Direction x = getWorld()->getIcemanDirection();
-	Direction dir = this->getDirection();
-	switch (dir) {
-	case(up):
-		if (x == down) {
-			return true;
-		}
-		else {
-			return false;
-		}
-		break;
-	case(down):
-		if (x == up) {
-			return true;
-		}
-		else {
-			return false;
-		}
-		break;
-	case(right):
-		if (x == left) {
-			return true;
-		}
-		else {
-			return false;
-		}
-		break;
-	case(left):
-		if (x == right) {
-			return true;
-		}
-		else {
-			return false;
-		}
-		break;
-	default:
-		return false;
-	}
 
-}
 void Protestor::moveProtestor() {
 	switch (this->getDirection()) {
 	case left:  //x-1
-		if (this->getX() > 0 && !(getWorld()->boulderInTheWay(*this)) && !(getWorld()->iceInFront(*this))) {
+		if (this->getX() > 0 && !(getWorld()->boulderInTheWay(*this, 1)) && !(getWorld()->iceInFront(*this))) {
 			moveTo(this->getX() - 1, this->getY());
 		}
 		else {
@@ -609,7 +569,7 @@ void Protestor::moveProtestor() {
 		}
 		break;
 	case right: //x+1
-		if (this->getX() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this)) && !(getWorld()->iceInFront(*this))) {
+		if (this->getX() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this, 1)) && !(getWorld()->iceInFront(*this))) {
 			moveTo(getX() + 1, this->getY());
 		}
 		else {
@@ -617,7 +577,7 @@ void Protestor::moveProtestor() {
 		}
 		break;
 	case down:  //y-1
-		if (this->getY() > 0 && !(getWorld()->boulderInTheWay(*this)) && !(getWorld()->iceInFront(*this))) {
+		if (this->getY() > 0 && !(getWorld()->boulderInTheWay(*this, 1)) && !(getWorld()->iceInFront(*this))) {
 			moveTo(this->getX(), this->getY() - 1);
 		}
 		else {
@@ -625,7 +585,7 @@ void Protestor::moveProtestor() {
 		}
 		break;
 	case up://y+1
-		if (this->getY() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this)) && !(getWorld()->iceInFront(*this))) {
+		if (this->getY() < MAX_WINDOW - 4 && !(getWorld()->boulderInTheWay(*this, 1)) && !(getWorld()->iceInFront(*this))) {
 			moveTo(this->getX(), this->getY() + 1);
 		}
 		else {
@@ -704,7 +664,7 @@ bool RegularProtestor::annoy(unsigned int amt) {
 
 		if (getHP() <= 0)
 		{
-			GameController::getInstance().playSound(SOUND_PLAYER_GIVE_UP);
+			GameController::getInstance().playSound(SOUND_PROTESTER_GIVE_UP);
 			if (amt == 2) //defeated by squirt
 			{
 				getWorld()->increaseScore(100);
@@ -741,29 +701,29 @@ void RegularProtestor::doSomething() {
 	int protestorX = this->getX();
 	int protestorY = this->getY();
 	if (getIsLeaving()) { //3
-		if (protestorX == 60 && protestorY == 60){ //a
+		if (protestorX == 60 && protestorY == 60) { //a
 			this->setDead();
 		}
-		getWorld()->leaveField(protestorX,protestorX);
+		getWorld()->leaveField(protestorX, protestorX);
 		return;
 
 	}
 	if (rest_state == m_ticksWait) {  //once the waiting time is over
 		if (m_distancetoTravel == 0) {
-		m_distancetoTravel = numSquaresToMoveInCurrentDirection();
+			m_distancetoTravel = numSquaresToMoveInCurrentDirection();
 		}
 		//4 DONE
-		if (getWorld()->icemanNearby(*this, protestorX, protestorY, 4.0) && oppositeDirection()) {
+		if (getWorld()->icemanNearby(*this, protestorX, protestorY, 4.0) && getWorld()->isFacingIceman(*this)) {
 			if (m_shout == 0) { //protestor has not shoulted in the last non resting 15 ticks
 				m_shout = 15;
 				GameController::getInstance().playSound(SOUND_PROTESTER_YELL);
-				//inform the iceman that he been annoyed for a totoal of 2 annoynace points
+				getWorld()->annoyIceman(2);
 				return;  //return immediatly
 			}
 		}
 		//5 straight hor or ver line of sight from iceman, 4 untis away from iceman DONE
 		if (getWorld()->icemanInSight(protestorX, protestorY) && getWorld()->
-			protestorRadius(protestorX, protestorY) >=4.0 && getWorld()->canReachIceman(protestorX, protestorY) && !getWorld()->boulderInFront(*this)) {
+			protestorRadius(protestorX, protestorY) >= 4.0 && getWorld()->canReachIceman(protestorX, protestorY) && !getWorld()->boulderInFront(*this)) {
 			Direction dir = getWorld()->faceIceman(protestorX, protestorY);
 			this->setDirection(dir);  //Change its direction to face in the direction of the Iceman]
 			this->moveProtestor();//then take one step toward iceman
@@ -775,7 +735,7 @@ void RegularProtestor::doSomething() {
 		else {
 			m_distancetoTravel--; //decrement numSquaresToMoveInCurrentDirection
 			if (m_distancetoTravel <= 0) {
-				pickRandDirection(protestorX,protestorY);
+				pickRandDirection(protestorX, protestorY);
 				this->moveProtestor();
 				if (m_distancetoTravel <= 0) {
 					m_distancetoTravel = numSquaresToMoveInCurrentDirection();
@@ -784,13 +744,13 @@ void RegularProtestor::doSomething() {
 			}
 		}
 		//7  DONE
-		if (getWorld()->canTurn(protestorX, protestorY,this->getDirection())) {
+		if (getWorld()->canTurn(protestorX, protestorY, this->getDirection())) {
 			if (m_perpendicular_tick <= 0) {
 				//set the direction to the selected perp. direction
 				this->setDirection(getWorld()->makeTurn(protestorX, protestorY, this->getDirection()));
 				//pick a new value for numSquares
 				m_distancetoTravel = numSquaresToMoveInCurrentDirection();
-				
+
 				m_perpendicular_tick = 200;
 			}
 			else {
@@ -833,7 +793,7 @@ bool HardcoreProtestor::annoy(unsigned int amt) {
 
 		if (getHP() <= 0)
 		{
-			GameController::getInstance().playSound(SOUND_PLAYER_GIVE_UP);
+			GameController::getInstance().playSound(SOUND_PROTESTER_GIVE_UP);
 			if (amt == 2) //defeated by squirt
 			{
 				getWorld()->increaseScore(250);
