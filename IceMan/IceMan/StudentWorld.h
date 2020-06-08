@@ -84,7 +84,7 @@ public:
 	GraphObject::Direction leaveField(int x, int y);
 	void findPath(int x, int y);
 	void createGrid();
-	void pickPath(int  proX, int proY, int d);
+	GraphObject:: Direction pickPath(int  proX, int proY, int d);
 
 	int generateRandX();
 	int generateRandY();
