@@ -714,8 +714,8 @@ void RegularProtestor::doSomething() {
 		if (protestorX == 60 && protestorY == 60){ //a
 			this->setDead();
 		}
-		//getWorld()->leaveField();
-
+		getWorld()->leaveField(protestorX,protestorX);
+		return;
 
 	}
 	if (rest_state == m_ticksWait) {  //once the waiting time is over
