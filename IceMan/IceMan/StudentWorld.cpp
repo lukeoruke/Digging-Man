@@ -1,243 +1,158 @@
-#ifndef ACTOR_H_
-#define ACTOR_H_
+#ifndef STUDENTWORLD_H_
+#define STUDENTWORLD_H_
 
-#include "GraphObject.h"
-#include "StudentWorld.h"
-#include <algorithm>
+#include "GameWorld.h"
+#include "GameConstants.h"
+#include "Actor.h"
+#include <string>
+#include <vector>
+#include <memory>
+#include <sstream>
+#include <queue>
 
-class StudentWorld;
+const int MAX_WINDOW = 64;
 
-class Actor : public GraphObject
+// Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
+class Actor;
+class Ice;
+class Iceman;
+class Boulder;
+class Gold;
+class Protestor;
+struct gridQueue {
+public:
+	gridQueue(int x, int y);
+	int getGridX();
+	int getGridY();
+
+private:
+	int m_x;
+	int m_y;
+};
+class StudentWorld : public GameWorld    //inherited from public gameworld
 {
 public:
-	Actor(StudentWorld* world, int imageID, int startX, int startY, Direction dir, double size, int depth);
-	virtual ~Actor();
-	virtual void doSomething() = 0;
-	virtual bool annoy(unsigned int amt) = 0;
-	//setters
-	bool setDead();
-	//getters
-	StudentWorld* getWorld() const;
-	bool getIsAlive();
+	//constructor
+	StudentWorld(std::string assetDir)
+		: GameWorld(assetDir)
+	{
+		player = nullptr;
+		m_bouldersLeft = 0;
+	}
+	//destructor
+	~StudentWorld();
+
+	//function declarations
+	void createIce();
+	void createPlayer();
+	void createSquirt(Iceman& man);
+	void createBoulder(int num);
+	void createOil(int num);
+	void createGold(int num);
+	void createSonar();
+	void createWater();
+	void createProtestor();
+	//void createHardcoreProtestor();
+	//std::unique_ptr<Iceman> getPlayer() const; 
+
 	//methods
-	void moveInDirection();
-private:
-	StudentWorld* m_world;
-	bool m_isAlive;
-};
-///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////ICE//////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
-class Ice : public GraphObject   //grpah object on pg 24
-{
-public:
-	Ice(int x, int y);
-	~Ice();
-};
+	int lvlBoulder(); //returns amount of boulders in current level
+	int lvlGold(); //returns amount of gold in current level
+	int lvlOil(); //returns amount of oil in current level
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////BOULDER//////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
-class Boulder : public Actor
-{
-public:
-	Boulder(StudentWorld* world, int x, int y);
-	~Boulder();
-	virtual void doSomething();
-	virtual bool annoy(unsigned int amt);
-	enum state { stable, waiting, falling };
-	void setStateBoulder(state x);
-	state getStateBoulder() const;
+	void overlap(const Actor& a);
+	bool overlapAt(int x, int y);
 
-private:
-	state m_state;
-	int m_BoulderTick;
-};
-///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////GOODIES//////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
-class Goodies : public Actor {
-public:
-	Goodies(StudentWorld* world, int startX, int startY, int imageID, int soundToPlay, bool activateOnPlayer,
-		bool activateOnProtester);
-	virtual ~Goodies();
-	virtual bool annoy(unsigned int amt);
-	enum goodieState { permanent, temporary };
+	bool annoyNearbyPeople(const Actor& a, unsigned int hp);
+	bool isRoomInFront(const Actor& a); //returns true if there is room for an object in front of player
+	bool iceInFront(const Actor& a);
+	bool boulderInFront(const Actor& a);
+	bool boulderInTheWay(const Actor& a);
+	bool icemanNearby(const Actor& a, int x, int y, double radius);
+	void placeGold(int x, int y);
+	void createNewItem();
+	void useSonar();
+	//added
+	bool icemanInSight(int x, int y);
+	double protestorRadius(int x, int y);
+	GraphObject::Direction getIcemanDirection();
+	GraphObject::Direction faceIceman(int x, int y);
+	bool canReachIceman(int x, int y);
+	bool canTurn(int x, int y, GraphObject::Direction r);
+	GraphObject::Direction makeTurn(int x, int y, GraphObject::Direction r);
+	GraphObject::Direction leaveField(int x, int y);
+	void findPath(int x, int y);
+	void createGrid();
+	GraphObject:: Direction pickPath(int  proX, int proY, int d);
 
+	int generateRandX();
+	int generateRandY();
+	bool distance(int x, int y); //(for creating new actor objects) returns true if euclidean distance between calling actor and a coordinate pair is greater than 6
+	double radius(int x1, int y1, int x2, int y2); //takes two sets of coordinates and returns the euclidean distance between them
+	void deleteIce(int x, int y);
+	void removeDead();
+
+	void setDisplayText();
+	std::string formatStats(unsigned int level, unsigned int lives, int health, int squirts, int gold, int barrelsLeft, int sonar, int score);
+	std::string ZeroPadNumber(int num);
+	std::string SpacePadNumber(int num, int pad);
 	//getters
-	int getItemSound() const;
-	bool getIsActiveOnPlayer() const;
-	bool getIsActiveOnProtestor() const;
-	goodieState getItemState() const;
-	int getitemTick() const;
+	StudentWorld* getStudentWorld();
+	int getBouldersLeft() const;
+	int getGoldLeft() const;
+	int getOilLeft() const;
+	int getSonarLeft() const;
+	int getWaterLeft() const;
+	int getSonarWaterTick();
+
 
 	//setters
-	void setItemState(bool state);
-	void setitemTicks(int ticks);
-	void decreaseTick();
-
-private:
-	goodieState goodie_state;
-	int goodie_sound;
-	int m_ticks;
-	bool is_active_on_player;
-	bool is_active_on_protest;
-};
-///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////GOLD/////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
-class Gold : public Goodies
-{
-public:
-	Gold(StudentWorld* world, int startX, int startY, bool temporary, bool activateOnPlayer, bool activateOnProtester);
-	~Gold();
-	virtual void doSomething();
-};
-///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////OIL//////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////   pg34
-class Oil : public Goodies {
-public:
-	Oil(StudentWorld* world, int startX, int startY);
-	~Oil();
-	virtual void doSomething();
-};
-//////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////SONAR///////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-// pg 21
-class Sonar : public Goodies {
-public:
-	Sonar(StudentWorld* world, int x, int y, bool state, int tick);
-	~Sonar();
-	virtual void doSomething();
-};
-///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////WATER////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
-class Water : public Goodies {
-public:
-	Water(StudentWorld* world, int x, int y, bool state, int tick);
-	~Water();
-	virtual void doSomething();
-};
-
-class Squirt : public Actor
-{
-public:
-	Squirt(StudentWorld* world, int row, int col, Direction direction);
-	~Squirt();
-	virtual void doSomething();
-	virtual bool annoy(unsigned int amt);
-
-private:
-	int m_travel_distance;
-};
-///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////PERSON///////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-class Person : public Actor {
-public:
-	Person(StudentWorld* world, int imageID, int startX, int startY, Direction dir, unsigned int health);
-	virtual ~Person();
-	//TODO: implement virtual functions for abstract class
-	//setters
-
-	virtual void gainGold() = 0;
-	virtual bool annoy(unsigned int amt);
-
-	//getters
-	int getHP() const;
-
-protected:
-	unsigned int m_HP;
-
-private:
-
-};
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////ICEMAN///////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
-class Iceman : public Person
-{
-public:
-	Iceman(StudentWorld* world);
-	~Iceman();
-	virtual void doSomething();
-	//setters
-	virtual void gainGold();
-	void gainOilIceman();
-	void gainSonarIceman();
-	void gainWaterIceman();
-
-	//getters
-	int getWaterAmnt() const;
-	int getSonarAmnt() const;
-	int getGoldAmnt() const;
-	int getOilAmnt() const;
-
-private:
-	int m_water_amnt;
-	int m_sonar_amnt;
-	int m_gold_amnt;
-	int m_oil_amnt;
-};
+	void decBouldersLeft();
+	void incBouldersLeft();
+	void decGoldLeft();
+	void incGoldLeft();
+	void incIcemanItem(char item);
+	void incOilLeft();
+	void decOilLeft();
+	void incSonarLeft();
+	void decSonarLeft();
+	void decWaterLeft();
+	void incWaterLeft();
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////PROTESTORS///////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////
-class Protestor : public Person {
-public:
-	Protestor(StudentWorld* world, int x, int y, int imageID, unsigned int health);
-	virtual ~Protestor() = 0;
-	virtual bool annoy(unsigned int amt);
+	//don't call these
+	virtual int init() {
+		createIce();
+		createPlayer();
+		createBoulder(lvlBoulder());
+		createOil(lvlOil());
+		createGold(lvlGold());
+		createProtestor();
+		return GWSTATUS_CONTINUE_GAME;
+	}
 
-	//setters
+	virtual int move();
 
-	//getters
-	bool getIsLeaving();
-	bool oppositeDirection();
-	void moveProtestor();
-	void pickRandDirection(int protestorX, int protestorY);
-	bool cannotMove();
-protected:
-
-	bool m_leaveState; //starts out in a Not leave the oil state (false)
-	int m_ticksWait;
-	int rest_state;
-	int m_distancetoTravel;
-	int m_shout;
-	int  m_perpendicular_tick;
-
-};
-
-class RegularProtestor : public Protestor
-{
-public:
-	RegularProtestor(StudentWorld* world, int x, int y);
-	void doSomething();
-	void gainGold();
-	int numSquaresToMoveInCurrentDirection();
-
-private:
-
-};
-
-class HardcoreProtestor : public Protestor
-{
-public:
-	HardcoreProtestor(StudentWorld* world, int x, int y);
-
-protected:
+	virtual void cleanUp();
 
 
 private:
-
+	//Ice* ice; //purpose?
+	//StudentWorld* world; //purpose?
+	std::unique_ptr<Ice> iceContainer[MAX_WINDOW][MAX_WINDOW];
+	int grid[MAX_WINDOW][MAX_WINDOW];
+	std::unique_ptr<Iceman> player;
+	std::vector<std::unique_ptr<Actor>> actors;
+	int m_bouldersLeft;
+	int m_goldleft;
+	int m_oilleft;
+	int m_sonarleft;
+	int m_waterleft;
+	std::queue<gridQueue> tree;
+	std::vector<GraphObject::Direction> stepsToLeave;
 };
 
-// Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
-#endif // ACTOR_H_
+#endif // STUDENTWORLD_H_
+
+
