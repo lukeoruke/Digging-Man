@@ -114,7 +114,7 @@ void StudentWorld::removeDead() {
 
 	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
 	actors.erase(std::remove_if(it, actors.end(), [&](unique_ptr<Actor>& upAct)-> bool
-	{return (upAct->getIsAlive() == false); }),
+		{return (upAct->getIsAlive() == false); }),
 		actors.end());
 
 	return;
@@ -189,34 +189,38 @@ bool StudentWorld::annoyNearbyPeople(const Actor& a, unsigned int hp)
 		if (radius(a.getX(), a.getY(), (*it)->getX(), (*it)->getY()) <= 3) {
 			if ((*it)->annoy(hp))
 				ans = true;
-			//TODO: pg 43,48 make sure score gets increased accordingly
 		}
 	}
 	return ans;
 }
 
 bool StudentWorld::protestorFoundGold(const Actor& a) {
-	
+
 	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
 	for (; it != actors.end(); it++) {
 		if (radius(a.getX(), a.getY(), (*it)->getX(), (*it)->getY()) <= 3) {
 			if ((*it)->getID() == IID_PROTESTER) {
-				//TODO: reg protestor to gain gold
-				dynamic_cast<RegularProtestor*>((*it).get())->gainGold();
-				increaseScore(25);
-				
-				return true;
-			} 
+				if (dynamic_cast<RegularProtestor*>((*it).get())->getIsLeaving() == false) {
+					dynamic_cast<RegularProtestor*>((*it).get())->gainGold();
+					increaseScore(25);
+					return true;
+				}
+			}
 			if ((*it)->getID() == IID_HARD_CORE_PROTESTER) {
-				//TODO: hc protestor to gain gold
-
-				increaseScore(50);
-				dynamic_cast<HardcoreProtestor*>((*it).get())->gainGold();
-				return true;
+				if (dynamic_cast<RegularProtestor*>((*it).get())->getIsLeaving() == false) {
+					increaseScore(50);
+					dynamic_cast<HardcoreProtestor*>((*it).get())->gainGold();
+					return true;
+				}
 			}
 		}
 	}
 	return false;
+}
+
+void StudentWorld::annoyIceman(unsigned int hp)
+{
+	player->annoy(hp);
 }
 
 bool StudentWorld::isRoomInFront(const Actor& a) {
@@ -375,14 +379,42 @@ GraphObject::Direction StudentWorld::faceIceman(int x, int y) {
 		return GraphObject::up;
 	}
 }
-bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out the boulder issue
+bool StudentWorld::isFacingIceman(const Actor& a)
+{
+	bool ans;
+	int xActor = a.getX();
+	int yActor = a.getY();
+	int xPlayer = player->getX();
+	int yPlayer = player->getY();
+	switch (a.getDirection()) {
+	case GraphObject::Direction::left:
+		if ((xActor == xPlayer + 4) && ((yActor >= yPlayer - 3) && yActor <= yPlayer + 3))
+			ans = true;
+		break;
+	case GraphObject::Direction::right:
+		if ((xActor == xPlayer - 4) && ((yActor >= yPlayer - 3) && yActor <= yPlayer + 3))
+			ans = true;
+		break;
+	case GraphObject::Direction::down:
+		if ((yActor == yPlayer + 4) && ((xActor >= xPlayer - 3) && xActor <= xPlayer + 3))
+			ans = true;
+		break;
+	case GraphObject::Direction::up:
+		if ((yActor == yPlayer - 4) && ((xActor >= xPlayer - 3) && xActor <= xPlayer + 3))
+			ans = true;
+		break;
+	default:
+		return false;
+	}
+}
+bool StudentWorld::canReachIceman(int x, int y) { //TODO:: cannot figure out the boulder issue
 	int px = player->getX();
 	int py = player->getY();
 	if (px == x) {  //if the protestor and iceman have the same X coord
 		if (py > y) { //if the player is higher then the protestor
 			int startY = y;
 			while (startY < py) {
-				if(iceContainer[x][startY] || iceContainer[x+1][startY] || iceContainer[x+2][startY] || iceContainer[x+3][startY])   // TODO:: account for boulders
+				if (iceContainer[x][startY] || iceContainer[x + 1][startY] || iceContainer[x + 2][startY] || iceContainer[x + 3][startY])   // TODO:: account for boulders
 				{
 					return false;
 				}
@@ -393,7 +425,7 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out th
 		else {
 			int startY = py;
 			while (startY < y) {
-				if (iceContainer[x][startY] || iceContainer[x+1][startY] || iceContainer[x+2][startY] || iceContainer[x+3][startY]) { // TODO:: account for boulders
+				if (iceContainer[x][startY] || iceContainer[x + 1][startY] || iceContainer[x + 2][startY] || iceContainer[x + 3][startY]) { // TODO:: account for boulders
 					return false;
 				}
 				startY++;
@@ -403,11 +435,11 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out th
 
 	}
 	//other half
-	if (py == y){//if the protestor and iceman have the same Y coord
+	if (py == y) {//if the protestor and iceman have the same Y coord
 		if (px > x) {
 			int startX = x;
 			while (startX < px) {
-				if (iceContainer[startX][y] || iceContainer[startX][y+1] || iceContainer[startX][y+2] || iceContainer[startX][y + 3]) {
+				if (iceContainer[startX][y] || iceContainer[startX][y + 1] || iceContainer[startX][y + 2] || iceContainer[startX][y + 3]) {
 					return false;
 				}
 				startX++;
@@ -433,7 +465,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 	switch (r) {
 	case GraphObject::up:
 		if (x + 1 == 61) { //if the protestor is to the very right
-			if ((!iceContainer[x-1][y] && !iceContainer[x-1][y+3])) {
+			if ((!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3])) {
 				return true;
 			}
 			else {
@@ -450,10 +482,10 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 		}
 		//if there is not ice to the right or left of protestor
 		if (!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3]) { //no ice to the right
-				return true;
+			return true;
 		}
 		if ((!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3])) { //no ice to the left
-				return true;
+			return true;
 		}
 		else {
 			return false;
@@ -478,7 +510,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 		}
 		//if there is no ice to the right or left of the protestor return true
 		if (!(y + 3 > 60)) { //starts counting from 57
-			if (!iceContainer[x+4][y] && !iceContainer[x + 4][y + 3]) { // no ice to the right 
+			if (!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3]) { // no ice to the right 
 				return true;
 			}
 			if ((!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3])) { // no ice to the left
@@ -494,10 +526,10 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 		break;
 	case GraphObject::left:
 		if (y + 1 == 61) { //if the protestor is at max height of the game
-			if ((!iceContainer[x][y-1] && !iceContainer[x+3][y-1]))  {   //checks below
+			if ((!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1])) {   //checks below
 				return true;
 			}
-			else {	
+			else {
 				return false;
 			}
 		}
@@ -510,10 +542,10 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 			}
 		}
 		//if there is not ice to the top or bottom of protestor TODO:: Check if these are right
-		if (!iceContainer[x][y-1] && !iceContainer[x+3][y-1]){ //no ice below him
+		if (!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1]) { //no ice below him
 			return true;
 		}
-		if (!iceContainer[x][y+4] && !iceContainer[x+3][y+4]) { //no ice above him
+		if (!iceContainer[x][y + 4] && !iceContainer[x + 3][y + 4]) { //no ice above him
 			return true;
 		}
 		else {
@@ -538,10 +570,10 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 			}
 		}
 		//if there is not ice to the top or bottom of protestor
-		if (!iceContainer[x][y-1] && !iceContainer[x+3][y-1]) { //no ice below him
+		if (!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1]) { //no ice below him
 			return true;
 		}
-		if (!iceContainer[x][y+4] && !iceContainer[x+3][y+4]) {
+		if (!iceContainer[x][y + 4] && !iceContainer[x + 3][y + 4]) {
 			return true;
 		}
 		else {
@@ -620,7 +652,7 @@ GraphObject::Direction StudentWorld::makeTurn(int x, int y, GraphObject::Directi
 				return GraphObject::up;
 			}
 		}
-		if (!iceContainer[x][y-1] && !iceContainer[x + 3][y - 1] && (!iceContainer[x][y+4] && !iceContainer[x+3][y + 4])) { // if both up/down are open,pick one
+		if (!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1] && (!iceContainer[x][y + 4] && !iceContainer[x + 3][y + 4])) { // if both up/down are open,pick one
 			if (choice == 0) {
 				return GraphObject::up;
 			}
@@ -637,12 +669,12 @@ GraphObject::Direction StudentWorld::makeTurn(int x, int y, GraphObject::Directi
 		}
 		break;
 	case GraphObject::right:
-		if (y + 1 == 61) { 
+		if (y + 1 == 61) {
 			if ((!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1])) {
 				return GraphObject::down;
 			}
 		}
-		if (y - 1 == -1) { 
+		if (y - 1 == -1) {
 			if (!iceContainer[x][y + 4] && !iceContainer[x + 3][y + 4]) {
 				return GraphObject::up;
 			}
@@ -703,7 +735,7 @@ void StudentWorld::findPath(int proX, int proY) {
 			tree.empty();
 			return;
 		}
-		if (guess.getGridX() != proX &&  guess.getGridY() != proY) {
+		if (guess.getGridX() != proX && guess.getGridY() != proY) {
 			if (grid[row][col] == 1000) { //current point
 				grid[row][col] = distance;
 				distance++;
@@ -712,15 +744,15 @@ void StudentWorld::findPath(int proX, int proY) {
 				grid[row][col + 1] = distance;
 				tree.push(gridQueue(row, col + 1));
 			}
-			if (grid[row+1][col] == 1000) {  //right the point
+			if (grid[row + 1][col] == 1000) {  //right the point
 				grid[row + 1][col] = distance;
 				tree.push(gridQueue(row + 1, col));
 			}
-			if (grid[row][col-1] == 1000) {   //below the point
+			if (grid[row][col - 1] == 1000) {   //below the point
 				grid[row][col - 1] = distance;
 				tree.push(gridQueue(row, col - 1));
 			}
-			if (grid[row-1][col] == 1000) {  //left of point
+			if (grid[row - 1][col] == 1000) {  //left of point
 				grid[row - 1][col] = distance;
 				tree.push(gridQueue(row - 1, col));
 			}
@@ -729,30 +761,30 @@ void StudentWorld::findPath(int proX, int proY) {
 	}
 }
 GraphObject::Direction StudentWorld::pickPath(int proX, int proY, int distance) {
-	  //EX the distance is 6
-		while (!grid[60][60]) {
-			if (grid[proX][proY + 1] == distance - 1) { //up
-				stepsToLeave.push_back(GraphObject::up);
-				return GraphObject::up;
-				break;
-			}
-			if (grid[proX + 1][proY] == distance - 1) { //right
-				stepsToLeave.push_back(GraphObject::right);
-				return GraphObject::right;
-				break;
-
-			}
-			if (grid[proX][proY - 1] == distance - 1) {
-				stepsToLeave.push_back(GraphObject::down);
-				return GraphObject::down;
-				break;
-			}
-			if (grid[proX - 1][proY] == distance - 1) {
-				stepsToLeave.push_back(GraphObject::left);
-				return GraphObject::left;
-				break;
-			}
+	//EX the distance is 6
+	while (!grid[60][60]) {
+		if (grid[proX][proY + 1] == distance - 1) { //up
+			stepsToLeave.push_back(GraphObject::up);
+			return GraphObject::up;
+			break;
 		}
+		if (grid[proX + 1][proY] == distance - 1) { //right
+			stepsToLeave.push_back(GraphObject::right);
+			return GraphObject::right;
+			break;
+
+		}
+		if (grid[proX][proY - 1] == distance - 1) {
+			stepsToLeave.push_back(GraphObject::down);
+			return GraphObject::down;
+			break;
+		}
+		if (grid[proX - 1][proY] == distance - 1) {
+			stepsToLeave.push_back(GraphObject::left);
+			return GraphObject::left;
+			break;
+		}
+	}
 }
 GraphObject::Direction StudentWorld::leaveField(int proX, int proY) {  //use threads to search multiple places at once
 	//vector<int> options;
@@ -764,9 +796,10 @@ GraphObject::Direction StudentWorld::leaveField(int proX, int proY) {  //use thr
 
 	int j = proX;
 	int k = proY;
-	int distance = grid[proX][proY];
+	
 	if (stepsToLeave.empty()) {
 		findPath(proX, proY); //sets the distance from protestor to exit
+		int distance = grid[proX][proY];
 		pickPath(j, k, distance);
 		distance--;
 		while (distance != 0) {
@@ -897,7 +930,7 @@ void StudentWorld::incBouldersLeft()
 	m_bouldersLeft++;
 }
 //we used this function
-bool StudentWorld::boulderInTheWay(const Actor& a)
+bool StudentWorld::boulderInTheWay(const Actor& a, int where)
 {
 	bool ans = false;
 	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
@@ -909,16 +942,16 @@ bool StudentWorld::boulderInTheWay(const Actor& a)
 		int yBoulder = (*it)->getY();
 		switch (a.getDirection()) {
 		case GraphObject::Direction::left:
-			xActor = xActor - 1;
+			xActor = xActor - where;
 			break;
 		case GraphObject::Direction::right:
-			xActor = xActor + 1;
+			xActor = xActor + where;
 			break;
 		case GraphObject::Direction::down:
-			yActor = yActor - 1;
+			yActor = yActor - where;
 			break;
 		case GraphObject::Direction::up:
-			yActor = yActor + 1;
+			yActor = yActor + where;
 			break;
 		default:
 			return false;
