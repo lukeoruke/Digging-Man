@@ -407,7 +407,7 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out th
 		if (px > x) {
 			int startX = x;
 			while (startX < px) {
-				if (iceContainer[startX][y]) {
+				if (iceContainer[startX][y] || iceContainer[startX][y+3]) {
 					return false;
 				}
 				startX++;
@@ -417,7 +417,7 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out th
 		else {
 			int startX = px;
 			while (startX < x) {
-				if (iceContainer[startX][y]) {
+				if (iceContainer[startX][y] ||iceContainer[startX][y+3]) {
 					return false;
 				}
 				startX++;
