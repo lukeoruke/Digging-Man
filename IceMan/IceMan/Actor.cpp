@@ -691,6 +691,36 @@ RegularProtestor::RegularProtestor(StudentWorld* world, int x, int y)
 	m_shout = 0;
 	m_perpendicular_tick = 0;
 }
+
+bool RegularProtestor::annoy(unsigned int amt) {
+	if (!m_leaveState)
+	{
+		m_HP -= amt;
+
+		if (getHP() <= 0)
+		{
+			GameController::getInstance().playSound(SOUND_PLAYER_GIVE_UP);
+			if (amt == 2) //defeated by squirt
+			{
+				getWorld()->increaseScore(100);
+			}
+			else
+			{
+				getWorld()->increaseScore(500);
+			}
+			m_leaveState = true;
+		}
+		else
+		{
+			GameController::getInstance().playSound(SOUND_PROTESTER_ANNOYED);
+			//TODO: set ticks to make protestor wait for N = max(50, 100 – current_level_number * 10) 
+			rest_state = -1 * std::max(50, 100 - static_cast<int>(getWorld()->getLevel()) * 10);
+		}
+		return true;
+	}
+	return false;
+}
+
 int RegularProtestor::numSquaresToMoveInCurrentDirection() {
 	return rand() % 53 + 8;     // 8-60
 }
@@ -698,12 +728,7 @@ void RegularProtestor::doSomething() {
 	if (!this->getIsAlive()) { //1
 		return;
 	}
-	if (this->m_HP <= 0) { // top of pg 43
-		m_leaveState = true;
-		GameController::getInstance().playSound(SOUND_PROTESTER_GIVE_UP);
-		rest_state = 0;
-		//TODO:: points for this part #4
-	}
+
 	if (this->rest_state != m_ticksWait) { //2
 		this->rest_state++;
 		return;
@@ -781,7 +806,9 @@ void RegularProtestor::doSomething() {
 	getWorld()->leaveField(protestorX, protestorY);
 }
 
-void RegularProtestor::gainGold() {}
+void RegularProtestor::gainGold() {
+	m_leaveState = true;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////HARDCORE/////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -789,4 +816,38 @@ HardcoreProtestor::HardcoreProtestor(StudentWorld* world, int x, int y)
 	:Protestor(world, x, y, IID_HARD_CORE_PROTESTER, 20)
 {
 
+}
+
+bool HardcoreProtestor::annoy(unsigned int amt) {
+	if (!m_leaveState)
+	{
+		m_HP -= amt;
+
+		if (getHP() <= 0)
+		{
+			GameController::getInstance().playSound(SOUND_PLAYER_GIVE_UP);
+			if (amt == 2) //defeated by squirt
+			{
+				getWorld()->increaseScore(250);
+			}
+			else
+			{
+				getWorld()->increaseScore(500);
+			}
+			m_leaveState = true;
+		}
+		else
+		{
+			GameController::getInstance().playSound(SOUND_PROTESTER_ANNOYED);
+			//TODO: set ticks to make protestor wait for N = max(50, 100 – current_level_number * 10) 
+			rest_state = -1 * std::max(50, 100 - static_cast<int>(getWorld()->getLevel()) * 10);
+		}
+		return true;
+	}
+	return false;
+}
+
+void HardcoreProtestor::gainGold()
+{
+	rest_state = -1 * std::max(50, 100 - static_cast<int>(getWorld()->getLevel()) * 10);
 }
