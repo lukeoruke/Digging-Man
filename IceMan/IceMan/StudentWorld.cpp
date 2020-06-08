@@ -665,36 +665,90 @@ void StudentWorld::createGrid() {
 	}
 
 }
-int StudentWorld::findPath(int proX, int proY) {
+void StudentWorld::findPath(int proX, int proY) {
 	createGrid();
 	tree.push(gridQueue(60, 60));
 	int distance = 0;
-	int row = 60;
-	int col = 60;
+
 	while (!tree.empty()) {
 		gridQueue guess = tree.front();
 		tree.pop();
+		int row = guess.getGridX();
+		int col = guess.getGridY();
+		if (row == proX && col == proY) {
+			tree.empty();
+			return;
+		}
 		if (guess.getGridX() != proX &&  guess.getGridY() != proY) {
-			if (grid[row][col] == 1000) {
+			if (grid[row][col] == 1000) { //current point
 				grid[row][col] == distance;
+				distance++;
 			}
-			tree.push(gridQueue(row, col + 1));
-			tree.push(gridQueue(row + 1, col));
-			tree.push(gridQueue(row, col - 1));
-			tree.push(gridQueue(row - 1, col));
-			
+			if (grid[row][col + 1] == 1000) {  //above the point
+				grid[row][col + 1] = distance;
+				tree.push(gridQueue(row, col + 1));
+			}
+			if (grid[row+1][col] == 1000) {  //right the point
+				grid[row + 1][col] == distance;
+				tree.push(gridQueue(row + 1, col));
+			}
+			if (grid[row][col-1] == 1000) {   //below the point
+				grid[row][col - 1] == distance;
+				tree.push(gridQueue(row, col - 1));
+			}
+			if (grid[row-1][col] == 1000) {  //left of point
+				grid[row - 1][col] == distance;
+				tree.push(gridQueue(row - 1, col));
+			}
+			distance++;
 		}
 	}
-	return 989;
 }
+void StudentWorld::pickPath(int proX, int proY, int distance) {
+	  //EX the distance is 6
+		while (!grid[60][60]) {
+			if (grid[proX][proY + 1] == distance - 1) { //up
+				stepsToLeave.push_back(GraphObject::up);
+				break;
+			}
+			if (grid[proX + 1][proY] == distance - 1) { //right
+				stepsToLeave.push_back(GraphObject::right);
+				break;
+			}
+			if (grid[proX][proY - 1] == distance - 1) {
+				stepsToLeave.push_back(GraphObject::down);
+				break;
+			}
+			if (grid[proX - 1][proY] == distance - 1) {
+				stepsToLeave.push_back(GraphObject::left);
+				break;
+			}
+		}
+}
+GraphObject::Direction StudentWorld::leaveField(int proX, int proY) {  //use threads to search multiple places at once
+	//vector<int> options;
+	//for (int r = 0; r < 4; r++) {
+	//	auto ft = async(launch::async, [&] {return findPath(proX,proY); });
+	//	int steps = ft.get();
+	//	options.push_back(steps);
+	//}
+	int distance = grid[proX][proY];
+	if (stepsToLeave.empty()) {
+		findPath(proX, proY); //sets the distance from protestor to exit
+		pickPath(proX, proY, distance);
+		distance--;
+		while (distance != 0) {
+			
+		}
 
-int StudentWorld::leaveField(int proX, int proY) {  //use threads to search multiple places at once
-	vector<int> options;
-	for (int r = 0; r < 4; r++) {
-		auto ft = async(launch::async, [&] {return findPath(proX,proY); });
-		int steps = ft.get();
-		options.push_back(steps);
 	}
+	else {
+
+	}
+	//how to move protestor one by one towards exit?
+
+
+
 	return 0;
 }
 
