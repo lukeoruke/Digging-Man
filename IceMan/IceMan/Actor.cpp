@@ -87,13 +87,14 @@ Squirt::Squirt(StudentWorld* world, int row, int col, GraphObject::Direction dir
 	m_travel_distance = 4;
 }
 void Squirt::doSomething() {
-	if (m_travel_distance > 0 && !getWorld()->annoyNearbyPeople(*this, 2)) {
-		m_travel_distance = 0;
-	}
-	else if (m_travel_distance > 0 && !getWorld()->iceInFront(*this) && !getWorld()->boulderInTheWay(*this, 1)) {
-		moveInDirection();
-		m_travel_distance--;
-
+	if (m_travel_distance > 0){
+		if (getWorld()->annoyNearbyPeople(*this, 2)) {
+			m_travel_distance = 0;
+		}
+		else if (!getWorld()->iceInFront(*this) && !getWorld()->boulderInTheWay(*this, 1)) {
+			moveInDirection();
+			m_travel_distance--;
+		}
 	}
 	else {
 		setDead();
@@ -769,8 +770,9 @@ void RegularProtestor::doSomething() {
 				GameController::getInstance().playSound(SOUND_PROTESTER_YELL);
 				getWorld()->annoyIceman(2);
 				//inform the iceman that he been annoyed for a totoal of 2 annoynace points
-				return;  //return immediatly
 			}
+			m_shout--;
+			return;
 		}
 		//5 straight hor or ver line of sight from iceman, 4 untis away from iceman DONE
 		if (getWorld()->icemanInSight(protestorX, protestorY) && getWorld()->
