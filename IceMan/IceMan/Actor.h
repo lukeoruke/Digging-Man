@@ -199,7 +199,6 @@ public:
 
 	//getters
 	bool getIsLeaving();
-	bool oppositeDirection();
 	void moveProtestor();
 	void pickRandDirection(int protestorX, int protestorY);
 	bool cannotMove();
