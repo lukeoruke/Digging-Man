@@ -80,9 +80,10 @@ public:
 	bool canReachIceman(int x, int y);
 	bool canTurn(int x, int y, GraphObject::Direction r);
 	GraphObject::Direction makeTurn(int x, int y, GraphObject::Direction r);
-	int leaveField(int x, int y);
-	int findPath(int x, int y);
+	GraphObject::Direction leaveField(int x, int y);
+	void findPath(int x, int y);
 	void createGrid();
+	void pickPath(int  proX, int proY, int d);
 
 	int generateRandX();
 	int generateRandY();
@@ -148,6 +149,7 @@ private:
 	int m_sonarleft;
 	int m_waterleft;
 	std::queue<gridQueue> tree;
+	std::vector<GraphObject::Direction> stepsToLeave;
 };
 
 
