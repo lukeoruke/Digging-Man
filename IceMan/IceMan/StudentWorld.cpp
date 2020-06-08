@@ -114,7 +114,7 @@ void StudentWorld::removeDead() {
 
 	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
 	actors.erase(std::remove_if(it, actors.end(), [&](unique_ptr<Actor>& upAct)-> bool
-		{return (upAct->getIsAlive() == false); }),
+	{return (upAct->getIsAlive() == false); }),
 		actors.end());
 
 	return;
@@ -217,12 +217,10 @@ bool StudentWorld::protestorFoundGold(const Actor& a) {
 	}
 	return false;
 }
-
 void StudentWorld::annoyIceman(unsigned int hp)
 {
 	player->annoy(hp);
 }
-
 bool StudentWorld::isRoomInFront(const Actor& a) {
 	bool ans = false;
 	int x = a.getX();
@@ -707,22 +705,32 @@ int gridQueue::getGridY() {
 	return m_y;
 }
 void StudentWorld::createGrid() {
-	for (int row = 0; row < MAX_WINDOW; row++) {
-		for (int col = 0; col < MAX_WINDOW - 4; col++) {
-			if (row < TUNNEL_COL_START || row > TUNNEL_COL_END || col < TUNNEL_ROW) {
-				if (iceContainer[row][col]) { //if there is ice or boulder, it is unreachable
-					grid[row][col] = 100000;
+	for (int row = 0; row <= 60; row++) {
+		for (int col = 0; col <= 60; col++) {
+			//if (row < TUNNEL_COL_START || row > TUNNEL_COL_END || col < TUNNEL_ROW) {
+				if (iceContainer[row][col].get() != nullptr) { //if there is ice or boulder, it is unreachable
+					grid[row][col] = 9999999;
 				}
 				else {
 					grid[row][col] = 1000; //if there is open space
-				}
-			}
+	 			}
+			//}
 		}
 	}
+	//testing one
+	for (int row = 0; row < 60; row++) {
+		for (int col = 0; col < 60; col++) {
+			if (iceContainer[row][col].get() == nullptr)
+				std::cout << row << "," << col << endl;
 
+		}
+	}
 }
-void StudentWorld::findPath(int proX, int proY) {
+int StudentWorld::findPath(int proX, int proY) {
 	createGrid();
+	cout << player->getX() <<endl;
+	cout << player->getY() << endl;
+
 	tree.push(gridQueue(60, 60));
 	int distance = 0;
 
@@ -733,10 +741,12 @@ void StudentWorld::findPath(int proX, int proY) {
 		int col = guess.getGridY();
 		if (row == proX && col == proY) {
 			tree.empty();
-			return;
+			distance--;
+			cout << "DISTANCE IS " << distance << endl;
+			return distance;
 		}
-		if (guess.getGridX() != proX && guess.getGridY() != proY) {
-			if (grid[row][col] == 1000) { //current point
+		//if (row != proX &&  col != proY) {
+			if (grid[row][col] == 1000 ) { //current point
 				grid[row][col] = distance;
 				distance++;
 			}
@@ -752,41 +762,42 @@ void StudentWorld::findPath(int proX, int proY) {
 				grid[row][col - 1] = distance;
 				tree.push(gridQueue(row, col - 1));
 			}
-			if (grid[row - 1][col] == 1000) {  //left of point
+			if (grid[row - 1][col] ==1000 ) {  //left of point
 				grid[row - 1][col] = distance;
 				tree.push(gridQueue(row - 1, col));
 			}
 			distance++;
-		}
+
+		//}
 	}
+	cout << "2nd distance display " << distance << endl;
+	return distance;
+
 }
 GraphObject::Direction StudentWorld::pickPath(int proX, int proY, int distance) {
 	//EX the distance is 6
-	while (!grid[60][60]) {
+	//while (distance != 0) {
 		if (grid[proX][proY + 1] == distance - 1) { //up
 			stepsToLeave.push_back(GraphObject::up);
 			return GraphObject::up;
-			break;
 		}
 		if (grid[proX + 1][proY] == distance - 1) { //right
 			stepsToLeave.push_back(GraphObject::right);
 			return GraphObject::right;
-			break;
-
 		}
 		if (grid[proX][proY - 1] == distance - 1) {
 			stepsToLeave.push_back(GraphObject::down);
 			return GraphObject::down;
-			break;
 		}
 		if (grid[proX - 1][proY] == distance - 1) {
 			stepsToLeave.push_back(GraphObject::left);
 			return GraphObject::left;
-			break;
 		}
-	}
+	//}
+
 }
-GraphObject::Direction StudentWorld::leaveField(int proX, int proY) {  //use threads to search multiple places at once
+std::vector<GraphObject::Direction> StudentWorld::leaveField(int proX, int proY) {  
+	//use threads to search multiple places at once
 	//vector<int> options;
 	//for (int r = 0; r < 4; r++) {
 	//	auto ft = async(launch::async, [&] {return findPath(proX,proY); });
@@ -796,34 +807,38 @@ GraphObject::Direction StudentWorld::leaveField(int proX, int proY) {  //use thr
 
 	int j = proX;
 	int k = proY;
-	
 	if (stepsToLeave.empty()) {
-		findPath(proX, proY); //sets the distance from protestor to exit
-		int distance = grid[proX][proY];
-		pickPath(j, k, distance);
-		distance--;
+		//findPath(proX, proY); //sets the distance from protestor to exit			leaveField																			  //|
+		int distance = StudentWorld::findPath(proX,proY);  //					pickPath()	findPath->createGrid
+		//for (int row = 0; row < MAX_WINDOW; row++) {
+		//	for (int col = 0; col < MAX_WINDOW - 4; col++) {
+		//		cout << row << "," << col << "has the value " <<
+		//			grid[row][col] << endl;
+		//	}
+		//};
 		while (distance != 0) {
 			GraphObject::Direction q = pickPath(j, k, distance);
 			if (q == GraphObject::up) {
-				j++;
-			}
-			if (q == GraphObject::right) {
 				k++;
 			}
-			if (q == GraphObject::down) {
-				j--;
+			if (q == GraphObject::right) {
+				j++;
 			}
-			if (q == GraphObject::left) {
+			if (q == GraphObject::down) {
 				k--;
 			}
-			distance--;
+			if (q == GraphObject::left) {
+				j--;
+			}
+ 			distance--;
 		}
 	}
-	else {
-		GraphObject::Direction step = stepsToLeave.front();
-		stepsToLeave.erase(stepsToLeave.begin());
-		return step;
-	}
+	//else {
+	//	GraphObject::Direction step = stepsToLeave.front();
+	//	stepsToLeave.erase(stepsToLeave.begin());
+	//	return stepsToLeave;
+	//}
+	return stepsToLeave;
 	//how to move protestor one by one towards exit?
 }
 
