@@ -399,11 +399,6 @@ void Gold::doSomething() {
 		}
 	}
 	if (this->getItemState() == temporary) {  //any item that is in a temporary state will come here and count down(dropped gold, sonar, water)
-		if (getWorld()->protestorFoundGold(*this))
-		{
-			setDead();
-			GameController::getInstance().playSound(SOUND_PROTESTER_FOUND_GOLD);
-		}
 		if (this->getitemTick() == 0) { //if the item has no tick left destroy it
 			setDead();
 		}
@@ -696,36 +691,6 @@ RegularProtestor::RegularProtestor(StudentWorld* world, int x, int y)
 	m_shout = 0;
 	m_perpendicular_tick = 0;
 }
-
-bool RegularProtestor::annoy(unsigned int amt) {
-	if (!m_leaveState)
-	{
-		m_HP -= amt;
-
-		if (getHP() <= 0)
-		{
-			GameController::getInstance().playSound(SOUND_PROTESTER_GIVE_UP);
-			if (amt == 2) //defeated by squirt
-			{
-				getWorld()->increaseScore(100);
-			}
-			else
-			{
-				getWorld()->increaseScore(500);
-			}
-			m_leaveState = true;
-		}
-		else
-		{
-			GameController::getInstance().playSound(SOUND_PROTESTER_ANNOYED);
-			//TODO: set ticks to make protestor wait for N = max(50, 100 – current_level_number * 10) 
-			rest_state = -1 * std::max(50, 100 - static_cast<int>(getWorld()->getLevel()) * 10);
-		}
-		return true;
-	}
-	return false;
-}
-
 int RegularProtestor::numSquaresToMoveInCurrentDirection() {
 	return rand() % 53 + 8;     // 8-60
 }
@@ -733,7 +698,12 @@ void RegularProtestor::doSomething() {
 	if (!this->getIsAlive()) { //1
 		return;
 	}
-
+	if (this->m_HP <= 0) { // top of pg 43
+		m_leaveState = true;
+		GameController::getInstance().playSound(SOUND_PROTESTER_GIVE_UP);
+		rest_state = 0;
+		//TODO:: points for this part #4
+	}
 	if (this->rest_state != m_ticksWait) { //2
 		this->rest_state++;
 		return;
@@ -741,15 +711,15 @@ void RegularProtestor::doSomething() {
 	int protestorX = this->getX();
 	int protestorY = this->getY();
 	if (getIsLeaving()) { //3
-		if (protestorX == 60 && protestorY == 60) { //a
+		if (protestorX == 60 && protestorY == 60){ //a
 			this->setDead();
 		}
-		getWorld()->leaveField(protestorX, protestorX);
+		getWorld()->leaveField(protestorX,protestorX);
 		return;
 
 	}
 	if (rest_state == m_ticksWait) {  //once the waiting time is over
-									  //4 DONE
+		//4 DONE
 		if (getWorld()->icemanNearby(*this, protestorX, protestorY, 4.0) && oppositeDirection()) {
 			if (m_shout == 0) { //protestor has not shoulted in the last non resting 15 ticks
 				m_shout = 15;
@@ -760,7 +730,7 @@ void RegularProtestor::doSomething() {
 		}
 		//5 straight hor or ver line of sight from iceman, 4 untis away from iceman DONE
 		if (getWorld()->icemanInSight(protestorX, protestorY) && getWorld()->
-			protestorRadius(protestorX, protestorY) >= 4.0 && getWorld()->canReachIceman(protestorX, protestorY) && !getWorld()->boulderInFront(*this)) {
+			protestorRadius(protestorX, protestorY) >=4.0 && getWorld()->canReachIceman(protestorX, protestorY) && !getWorld()->boulderInFront(*this)) {
 			Direction dir = getWorld()->faceIceman(protestorX, protestorY);
 			this->setDirection(dir);  //Change its direction to face in the direction of the Iceman]
 			this->moveProtestor();//then take one step toward iceman
@@ -772,7 +742,7 @@ void RegularProtestor::doSomething() {
 		else {
 			m_distancetoTravel--; //decrement numSquaresToMoveInCurrentDirection
 			if (m_distancetoTravel <= 0) {
-				pickRandDirection(protestorX, protestorY);
+				pickRandDirection(protestorX,protestorY);
 				this->moveProtestor();
 				if (m_distancetoTravel <= 0) {
 					m_distancetoTravel = numSquaresToMoveInCurrentDirection();
@@ -781,13 +751,13 @@ void RegularProtestor::doSomething() {
 			}
 		}
 		//7  DONE
-		if (getWorld()->canTurn(protestorX, protestorY, this->getDirection())) {
+		if (getWorld()->canTurn(protestorX, protestorY,this->getDirection())) {
 			if (m_perpendicular_tick <= 0) {
 				//set the direction to the selected perp. direction
 				this->setDirection(getWorld()->makeTurn(protestorX, protestorY, this->getDirection()));
 				//pick a new value for numSquares
 				m_distancetoTravel = numSquaresToMoveInCurrentDirection();
-
+				
 				m_perpendicular_tick = 200;
 			}
 			else {
@@ -811,9 +781,7 @@ void RegularProtestor::doSomething() {
 	//getWorld()->leaveField(protestorX, protestorY);
 }
 
-void RegularProtestor::gainGold() {
-	m_leaveState = true;
-}
+void RegularProtestor::gainGold() {}
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////HARDCORE/////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -821,38 +789,4 @@ HardcoreProtestor::HardcoreProtestor(StudentWorld* world, int x, int y)
 	:Protestor(world, x, y, IID_HARD_CORE_PROTESTER, 20)
 {
 
-}
-
-bool HardcoreProtestor::annoy(unsigned int amt) {
-	if (!m_leaveState)
-	{
-		m_HP -= amt;
-
-		if (getHP() <= 0)
-		{
-			GameController::getInstance().playSound(SOUND_PLAYER_GIVE_UP);
-			if (amt == 2) //defeated by squirt
-			{
-				getWorld()->increaseScore(250);
-			}
-			else
-			{
-				getWorld()->increaseScore(500);
-			}
-			m_leaveState = true;
-		}
-		else
-		{
-			GameController::getInstance().playSound(SOUND_PROTESTER_ANNOYED);
-			//TODO: set ticks to make protestor wait for N = max(50, 100 – current_level_number * 10) 
-			rest_state = -1 * std::max(50, 100 - static_cast<int>(getWorld()->getLevel()) * 10);
-		}
-		return true;
-	}
-	return false;
-}
-
-void HardcoreProtestor::gainGold()
-{
-	rest_state = -1 * std::max(50, 100 - static_cast<int>(getWorld()->getLevel()) * 10);
 }
