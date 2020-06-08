@@ -749,6 +749,9 @@ void RegularProtestor::doSomething() {
 
 	}
 	if (rest_state == m_ticksWait) {  //once the waiting time is over
+		if (m_distancetoTravel == 0) {
+		m_distancetoTravel = numSquaresToMoveInCurrentDirection();
+		}
 		//4 DONE
 		if (getWorld()->icemanNearby(*this, protestorX, protestorY, 4.0) && oppositeDirection()) {
 			if (m_shout == 0) { //protestor has not shoulted in the last non resting 15 ticks
