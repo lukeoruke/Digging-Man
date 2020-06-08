@@ -704,7 +704,7 @@ bool RegularProtestor::annoy(unsigned int amt) {
 
 		if (getHP() <= 0)
 		{
-			GameController::getInstance().playSound(SOUND_PLAYER_GIVE_UP);
+			GameController::getInstance().playSound(SOUND_PROTESTER_GIVE_UP);
 			if (amt == 2) //defeated by squirt
 			{
 				getWorld()->increaseScore(100);
@@ -741,15 +741,15 @@ void RegularProtestor::doSomething() {
 	int protestorX = this->getX();
 	int protestorY = this->getY();
 	if (getIsLeaving()) { //3
-		if (protestorX == 60 && protestorY == 60){ //a
+		if (protestorX == 60 && protestorY == 60) { //a
 			this->setDead();
 		}
-		getWorld()->leaveField(protestorX,protestorX);
+		getWorld()->leaveField(protestorX, protestorX);
 		return;
 
 	}
 	if (rest_state == m_ticksWait) {  //once the waiting time is over
-		//4 DONE
+									  //4 DONE
 		if (getWorld()->icemanNearby(*this, protestorX, protestorY, 4.0) && oppositeDirection()) {
 			if (m_shout == 0) { //protestor has not shoulted in the last non resting 15 ticks
 				m_shout = 15;
@@ -760,7 +760,7 @@ void RegularProtestor::doSomething() {
 		}
 		//5 straight hor or ver line of sight from iceman, 4 untis away from iceman DONE
 		if (getWorld()->icemanInSight(protestorX, protestorY) && getWorld()->
-			protestorRadius(protestorX, protestorY) >=4.0 && getWorld()->canReachIceman(protestorX, protestorY) && !getWorld()->boulderInFront(*this)) {
+			protestorRadius(protestorX, protestorY) >= 4.0 && getWorld()->canReachIceman(protestorX, protestorY) && !getWorld()->boulderInFront(*this)) {
 			Direction dir = getWorld()->faceIceman(protestorX, protestorY);
 			this->setDirection(dir);  //Change its direction to face in the direction of the Iceman]
 			this->moveProtestor();//then take one step toward iceman
@@ -772,7 +772,7 @@ void RegularProtestor::doSomething() {
 		else {
 			m_distancetoTravel--; //decrement numSquaresToMoveInCurrentDirection
 			if (m_distancetoTravel <= 0) {
-				pickRandDirection(protestorX,protestorY);
+				pickRandDirection(protestorX, protestorY);
 				this->moveProtestor();
 				if (m_distancetoTravel <= 0) {
 					m_distancetoTravel = numSquaresToMoveInCurrentDirection();
@@ -781,13 +781,13 @@ void RegularProtestor::doSomething() {
 			}
 		}
 		//7  DONE
-		if (getWorld()->canTurn(protestorX, protestorY,this->getDirection())) {
+		if (getWorld()->canTurn(protestorX, protestorY, this->getDirection())) {
 			if (m_perpendicular_tick <= 0) {
 				//set the direction to the selected perp. direction
 				this->setDirection(getWorld()->makeTurn(protestorX, protestorY, this->getDirection()));
 				//pick a new value for numSquares
 				m_distancetoTravel = numSquaresToMoveInCurrentDirection();
-				
+
 				m_perpendicular_tick = 200;
 			}
 			else {
@@ -808,7 +808,7 @@ void RegularProtestor::doSomething() {
 		m_shout--;
 	}
 	//this line is just testing
-	getWorld()->leaveField(protestorX, protestorY);
+	//getWorld()->leaveField(protestorX, protestorY);
 }
 
 void RegularProtestor::gainGold() {
