@@ -63,6 +63,7 @@ public:
 	void overlap(const Actor& a);
 	bool overlapAt(int x, int y);
 
+	bool protestorFoundGold(const Actor& a);
 	bool annoyNearbyPeople(const Actor& a, unsigned int hp);
 	bool isRoomInFront(const Actor& a); //returns true if there is room for an object in front of player
 	bool iceInFront(const Actor& a);
