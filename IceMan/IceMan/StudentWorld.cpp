@@ -195,6 +195,26 @@ bool StudentWorld::annoyNearbyPeople(const Actor& a, unsigned int hp)
 	return ans;
 }
 
+bool StudentWorld::protestorFoundGold(const Actor& a) {
+	
+	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
+	for (; it != actors.end(); it++) {
+		if (radius(a.getX(), a.getY(), (*it)->getX(), (*it)->getY()) <= 3) {
+			if ((*it)->getID() == IID_PROTESTER) {
+				dynamic_cast<RegularProtestor*>((*it).get())->gainGold();
+				increaseScore(25);
+				return true;
+			} 
+			if ((*it)->getID() == IID_HARD_CORE_PROTESTER) {
+				increaseScore(50);
+				dynamic_cast<HardcoreProtestor*>((*it).get())->gainGold();
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 bool StudentWorld::isRoomInFront(const Actor& a) {
 	bool ans = false;
 	int x = a.getX();
