@@ -399,6 +399,11 @@ void Gold::doSomething() {
 		}
 	}
 	if (this->getItemState() == temporary) {  //any item that is in a temporary state will come here and count down(dropped gold, sonar, water)
+		if (getWorld()->protestorFoundGold(*this))
+		{
+			setDead();
+			GameController::getInstance().playSound(SOUND_PROTESTER_FOUND_GOLD);
+		}
 		if (this->getitemTick() == 0) { //if the item has no tick left destroy it
 			setDead();
 		}
