@@ -382,7 +382,7 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out th
 		if (py > y) { //if the player is higher then the protestor
 			int startY = y;
 			while (startY < py) {
-				if (iceContainer[x][startY] || iceContainer[x+3][startY])  // TODO:: account for boulders
+				if(iceContainer[x][startY] || iceContainer[x+1][startY] || iceContainer[x+2][startY] || iceContainer[x+3][startY])   // TODO:: account for boulders
 				{
 					return false;
 				}
@@ -393,7 +393,7 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out th
 		else {
 			int startY = py;
 			while (startY < y) {
-				if (iceContainer[x][startY] || iceContainer[x + 3][startY]) { // TODO:: account for boulders
+				if (iceContainer[x][startY] || iceContainer[x+1][startY] || iceContainer[x+2][startY] || iceContainer[x+3][startY]) { // TODO:: account for boulders
 					return false;
 				}
 				startY++;
@@ -407,7 +407,7 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out th
 		if (px > x) {
 			int startX = x;
 			while (startX < px) {
-				if (iceContainer[startX][y] || iceContainer[startX][y+3]) {
+				if (iceContainer[startX][y] || iceContainer[startX][y+1] || iceContainer[startX][y+2] || iceContainer[startX][y + 3]) {
 					return false;
 				}
 				startX++;
@@ -417,7 +417,7 @@ bool StudentWorld:: canReachIceman(int x, int y) { //TODO:: cannot figure out th
 		else {
 			int startX = px;
 			while (startX < x) {
-				if (iceContainer[startX][y] ||iceContainer[startX][y+3]) {
+				if (iceContainer[startX][y] || iceContainer[startX][y + 1] || iceContainer[startX][y + 2] || iceContainer[startX][y + 3]) {
 					return false;
 				}
 				startX++;
