@@ -4,6 +4,7 @@
 #include "GraphObject.h"
 #include "StudentWorld.h"
 #include <algorithm>
+#include <vector>
 
 class StudentWorld;
 
@@ -199,9 +200,10 @@ public:
 
 	//getters
 	bool getIsLeaving();
+	//bool oppositeDirection();
 	void moveProtestor();
 	void pickRandDirection(int protestorX, int protestorY);
-	bool cannotMove();
+	//bool cannotMove();
 protected:
 
 	bool m_leaveState; //starts out in a Not leave the oil state (false)
@@ -210,6 +212,8 @@ protected:
 	int m_distancetoTravel;
 	int m_shout;
 	int  m_perpendicular_tick;
+	//std::queue<gridQueue> tree;
+	std::vector<GraphObject::Direction> stepsToLeave;
 
 };
 
