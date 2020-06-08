@@ -193,7 +193,7 @@ class Protestor : public Person {
 public:
 	Protestor(StudentWorld* world, int x, int y, int imageID, unsigned int health);
 	virtual ~Protestor() = 0;
-	virtual bool annoy(unsigned int amt);
+	//virtual bool annoy(unsigned int amt);
 
 	//setters
 
@@ -218,6 +218,7 @@ class RegularProtestor : public Protestor
 {
 public:
 	RegularProtestor(StudentWorld* world, int x, int y);
+	virtual bool annoy(unsigned int amt);
 	void doSomething();
 	void gainGold();
 	int numSquaresToMoveInCurrentDirection();
@@ -230,7 +231,8 @@ class HardcoreProtestor : public Protestor
 {
 public:
 	HardcoreProtestor(StudentWorld* world, int x, int y);
-
+	virtual bool annoy(unsigned int amt);
+	void gainGold();
 protected:
 
 
