@@ -81,14 +81,14 @@ Ice::~Ice() {};
 //////////////////////////////////////////SQUIRT///////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 Squirt::Squirt(StudentWorld* world, int row, int col, GraphObject::Direction direction)
-	: Actor(world, IID_WATER_SPURT, row, col, direction, 1.0, 0)
+	: Actor(world, IID_WATER_SPURT, row, col, direction, 1.0, 1)
 {
+	setVisible(true);
 	m_travel_distance = 4;
 }
-
 void Squirt::doSomething() {
-	if (getWorld()->annoyNearbyPeople(*this, 2)) {
-		setDead();
+	if (m_travel_distance > 0 && !getWorld()->annoyNearbyPeople(*this, 2)) {
+		m_travel_distance = 0;
 	}
 	else if (m_travel_distance > 0 && !getWorld()->iceInFront(*this) && !getWorld()->boulderInTheWay(*this, 1)) {
 		moveInDirection();
@@ -100,16 +100,14 @@ void Squirt::doSomething() {
 	}
 	return;
 }
+	bool Squirt::annoy(unsigned int amt)
+	{
+		return false;
+	}
+	Squirt::~Squirt() {
+		setDead();
+	}
 
-bool Squirt::annoy(unsigned int amt)
-{
-	return false;
-}
-
-Squirt::~Squirt() {
-	setDead();
-
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////ICEMAN///////////////////////////////////////////////
@@ -172,7 +170,7 @@ void Iceman::doSomething() {
 				setDirection(down);
 			else if (getY() > 0 && !(getWorld()->boulderInTheWay(*this, 1)))
 				moveTo(getX(), getY() - 1);
-			break;
+			break;;
 		case KEY_PRESS_UP: //y+1
 			if (getDirection() != up)
 				setDirection(up);
@@ -505,7 +503,7 @@ void Water::doSomething() {
 
 
 Person::Person(StudentWorld* world, int imageID, int startX, int startY, Direction dir, unsigned int health)
-	:Actor(world, imageID, startX, startY, dir, 1, 0)
+	:Actor(world, imageID, startX, startY, dir, 1.0, 0)
 {
 	m_HP = health;
 	//player 
@@ -556,8 +554,47 @@ bool Protestor::getIsLeaving()
 {
 	return m_leaveState;
 }
-
-
+//bool Protestor::oppositeDirection() {  //the cases are the protestors direction
+//	Direction x = getWorld()->getIcemanDirection();
+//	Direction dir = this->getDirection();
+//	switch (dir) {
+//	case(up):
+//		if (x == down) {
+//			return true;
+//		}
+//		else {
+//			return false;
+//		}
+//		break;
+//	case(down):
+//		if (x == up) {
+//			return true;
+//		}
+//		else {
+//			return false;
+//		}
+//		break;
+//	case(right):
+//		if (x == left) {
+//			return true;
+//		}
+//		else {
+//			return false;
+//		}
+//		break;
+//	case(left):
+//		if (x == right) {
+//			return true;
+//		}
+//		else {
+//			return false;
+//		}
+//		break;
+//	default:
+//		return false;
+//	}
+//
+//}
 void Protestor::moveProtestor() {
 	switch (this->getDirection()) {
 	case left:  //x-1
@@ -689,6 +726,7 @@ bool RegularProtestor::annoy(unsigned int amt) {
 int RegularProtestor::numSquaresToMoveInCurrentDirection() {
 	return rand() % 53 + 8;     // 8-60
 }
+
 void RegularProtestor::doSomething() {
 	if (!this->getIsAlive()) { //1
 		return;
@@ -698,13 +736,25 @@ void RegularProtestor::doSomething() {
 		this->rest_state++;
 		return;
 	}
+	
 	int protestorX = this->getX();
 	int protestorY = this->getY();
-	if (getIsLeaving()) { //3
+	//std::cout << "the protestor x and y are " << protestorX << "  " << protestorY;
+	if (getIsLeaving() && rest_state == m_ticksWait) { //3
+
 		if (protestorX == 60 && protestorY == 60) { //a
 			this->setDead();
 		}
-		getWorld()->leaveField(protestorX, protestorX);
+		if (stepsToLeave.empty()) {  //if the vector is  empty
+			stepsToLeave = getWorld()->leaveField(protestorX, protestorY);
+		}
+		else {
+			Direction d = stepsToLeave.front();
+			stepsToLeave.erase(stepsToLeave.begin());  //this should pop front of vec
+			this->setDirection(d);
+			this->moveProtestor();
+			return;
+		}
 		return;
 
 	}
@@ -713,11 +763,12 @@ void RegularProtestor::doSomething() {
 			m_distancetoTravel = numSquaresToMoveInCurrentDirection();
 		}
 		//4 DONE
-		if (getWorld()->icemanNearby(*this, protestorX, protestorY, 4.0) && getWorld()->isFacingIceman(*this)) {
+		  if (getWorld()->icemanNearby(*this, protestorX, protestorY, 4.0) && getWorld()->isFacingIceman(*this)) {
 			if (m_shout == 0) { //protestor has not shoulted in the last non resting 15 ticks
 				m_shout = 15;
 				GameController::getInstance().playSound(SOUND_PROTESTER_YELL);
 				getWorld()->annoyIceman(2);
+				//inform the iceman that he been annoyed for a totoal of 2 annoynace points
 				return;  //return immediatly
 			}
 		}
