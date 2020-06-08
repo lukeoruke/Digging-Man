@@ -83,10 +83,10 @@ public:
 	bool canReachIceman(int x, int y);
 	bool canTurn(int x, int y, GraphObject::Direction r);
 	GraphObject::Direction makeTurn(int x, int y, GraphObject::Direction r);
-	GraphObject::Direction leaveField(int x, int y);
-	void findPath(int x, int y);
+	std::vector<GraphObject::Direction>  leaveField(int x, int y);
+	int findPath(int x, int y);
 	void createGrid();
-	GraphObject::Direction pickPath(int  proX, int proY, int distance);
+	GraphObject::Direction pickPath(int  proX, int proY, int d);
 
 	int generateRandX();
 	int generateRandY();
