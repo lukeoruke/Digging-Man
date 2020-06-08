@@ -64,11 +64,12 @@ public:
 	bool overlapAt(int x, int y);
 
 	bool protestorFoundGold(const Actor& a);
+	void annoyIceman(unsigned int hp);
 	bool annoyNearbyPeople(const Actor& a, unsigned int hp);
 	bool isRoomInFront(const Actor& a); //returns true if there is room for an object in front of player
 	bool iceInFront(const Actor& a);
 	bool boulderInFront(const Actor& a);
-	bool boulderInTheWay(const Actor& a);
+	bool boulderInTheWay(const Actor& a, int where);
 	bool icemanNearby(const Actor& a, int x, int y, double radius);
 	void placeGold(int x, int y);
 	void createNewItem();
@@ -78,13 +79,14 @@ public:
 	double protestorRadius(int x, int y);
 	GraphObject::Direction getIcemanDirection();
 	GraphObject::Direction faceIceman(int x, int y);
+	bool isFacingIceman(const Actor& a);
 	bool canReachIceman(int x, int y);
 	bool canTurn(int x, int y, GraphObject::Direction r);
 	GraphObject::Direction makeTurn(int x, int y, GraphObject::Direction r);
 	GraphObject::Direction leaveField(int x, int y);
 	void findPath(int x, int y);
 	void createGrid();
-	GraphObject:: Direction pickPath(int  proX, int proY, int d);
+	GraphObject::Direction pickPath(int  proX, int proY, int distance);
 
 	int generateRandX();
 	int generateRandY();
