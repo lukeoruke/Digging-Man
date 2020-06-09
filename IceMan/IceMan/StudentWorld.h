@@ -52,8 +52,7 @@ public:
 	void createSonar();
 	void createWater();
 	void createProtestor();
-	//void createHardcoreProtestor();
-	//std::unique_ptr<Iceman> getPlayer() const; 
+	void createHProtestor();
 
 	//methods
 	int lvlBoulder(); //returns amount of boulders in current level
@@ -131,6 +130,7 @@ public:
 		createOil(lvlOil());
 		createGold(lvlGold());
 		createProtestor();
+		createHProtestor();
 		return GWSTATUS_CONTINUE_GAME;
 	}
 
