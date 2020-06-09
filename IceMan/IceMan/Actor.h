@@ -68,7 +68,7 @@ public:
 	//getters
 	int getItemSound() const;
 	bool getIsActiveOnPlayer() const;
-	bool getIsActiveOnProtestor() const;
+	bool getIsActiveOnProtester() const;
 	goodieState getItemState() const;
 	int getitemTick() const;
 
@@ -188,12 +188,12 @@ private:
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////PROTESTORS///////////////////////////////////////////
+////////////////////////////////////////PROTESTERS///////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
-class Protestor : public Person {
+class Protester : public Person {
 public:
-	Protestor(StudentWorld* world, int x, int y, int imageID, unsigned int health);
-	virtual ~Protestor() = 0;
+	Protester(StudentWorld* world, int x, int y, int imageID, unsigned int health);
+	virtual ~Protester() = 0;
 	//virtual bool annoy(unsigned int amt);
 
 	//setters
@@ -201,8 +201,8 @@ public:
 	//getters
 	bool getIsLeaving();
 	//bool oppositeDirection();
-	void moveProtestor();
-	void pickRandDirection(int protestorX, int protestorY);
+	void moveProtester();
+	void pickRandDirection(int protesterX, int protesterY);
 	//bool cannotMove();
 protected:
 
@@ -217,10 +217,10 @@ protected:
 
 };
 
-class RegularProtestor : public Protestor
+class RegularProtester : public Protester
 {
 public:
-	RegularProtestor(StudentWorld* world, int x, int y);
+	RegularProtester(StudentWorld* world, int x, int y);
 	virtual bool annoy(unsigned int amt);
 	void doSomething();
 	void gainGold();
@@ -230,10 +230,10 @@ private:
 
 };
 
-class HardcoreProtestor : public Protestor
+class HardcoreProtester : public Protester
 {
 public:
-	HardcoreProtestor(StudentWorld* world, int x, int y);
+	HardcoreProtester(StudentWorld* world, int x, int y);
 	virtual bool annoy(unsigned int amt);
 	void gainGold();
 	void doSomething();
