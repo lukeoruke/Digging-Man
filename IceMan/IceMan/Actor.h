@@ -236,6 +236,8 @@ public:
 	HardcoreProtestor(StudentWorld* world, int x, int y);
 	virtual bool annoy(unsigned int amt);
 	void gainGold();
+	void doSomething();
+	int numSquaresToMoveInCurrentDirection();
 protected:
 
 
