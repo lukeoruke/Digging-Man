@@ -87,14 +87,13 @@ Squirt::Squirt(StudentWorld* world, int row, int col, GraphObject::Direction dir
 	m_travel_distance = 4;
 }
 void Squirt::doSomething() {
-	if (m_travel_distance > 0){
-		if (getWorld()->annoyNearbyPeople(*this, 2)) {
-			m_travel_distance = 0;
-		}
-		else if (!getWorld()->iceInFront(*this) && !getWorld()->boulderInTheWay(*this, 1)) {
-			moveInDirection();
-			m_travel_distance--;
-		}
+	if (m_travel_distance > 0 && !getWorld()->annoyNearbyPeople(*this, 2)) {
+		m_travel_distance = 0;
+	}
+	else if (m_travel_distance > 0 && !getWorld()->iceInFront(*this) && !getWorld()->boulderInTheWay(*this, 1)) {
+		moveInDirection();
+		m_travel_distance--;
+
 	}
 	else {
 		setDead();
@@ -702,6 +701,7 @@ bool RegularProtestor::annoy(unsigned int amt) {
 
 		if (getHP() <= 0)
 		{
+			rest_state = 0;
 			GameController::getInstance().playSound(SOUND_PROTESTER_GIVE_UP);
 			if (amt == 2) //defeated by squirt
 			{
@@ -836,7 +836,9 @@ void RegularProtestor::gainGold() {
 HardcoreProtestor::HardcoreProtestor(StudentWorld* world, int x, int y)
 	:Protestor(world, x, y, IID_HARD_CORE_PROTESTER, 20)
 {
-
+	m_ticksWait = std::max(0, 3 - static_cast<int>(getWorld()->getLevel()) / 4);
+	m_shout = 0;
+	m_perpendicular_tick = 0;
 }
 
 bool HardcoreProtestor::annoy(unsigned int amt) {
@@ -871,4 +873,104 @@ bool HardcoreProtestor::annoy(unsigned int amt) {
 void HardcoreProtestor::gainGold()
 {
 	rest_state = -1 * std::max(50, 100 - static_cast<int>(getWorld()->getLevel()) * 10);
+}
+int HardcoreProtestor::numSquaresToMoveInCurrentDirection() {
+	return rand() % 53 + 8;     // 8-60
+}
+void HardcoreProtestor::doSomething() {
+	if (!this->getIsAlive()) { //1
+		return;
+	}
+
+	if (this->rest_state != m_ticksWait) { //2
+		this->rest_state++;
+		return;
+	}
+
+	int protestorX = this->getX();
+	int protestorY = this->getY();
+	if (getIsLeaving() && rest_state == m_ticksWait) { //3
+
+		if (protestorX == 60 && protestorY == 60) { //a
+			this->setDead();
+		}
+		if (stepsToLeave.empty()) {  //if the vector is  empty
+			stepsToLeave = getWorld()->leaveField(protestorX, protestorY);
+		}
+		else {
+			Direction d = stepsToLeave.front();
+			stepsToLeave.erase(stepsToLeave.begin());  //this should pop front of vec
+			this->setDirection(d);
+			this->moveProtestor();
+			return;
+		}
+		return;
+
+	}
+	if (rest_state == m_ticksWait) {  //once the waiting time is over
+		if (m_distancetoTravel == 0) {
+			m_distancetoTravel = numSquaresToMoveInCurrentDirection();
+		}
+		//4 DONE
+		if (getWorld()->icemanNearby(*this, protestorX, protestorY, 4.0) && getWorld()->isFacingIceman(*this)) {
+			if (m_shout == 0) { //protestor has not shoulted in the last non resting 15 ticks
+				m_shout = 15;
+				GameController::getInstance().playSound(SOUND_PROTESTER_YELL);
+				getWorld()->annoyIceman(2);
+				//inform the iceman that he been annoyed for a totoal of 2 annoynace points
+			}
+			m_shout--;
+			return;
+		}
+		//5 straight hor or ver line of sight from iceman, 4 untis away from iceman DONE
+		if (getWorld()->icemanInSight(protestorX, protestorY) && getWorld()->
+			protestorRadius(protestorX, protestorY) >= 4.0 && getWorld()->canReachIceman(protestorX, protestorY) && !getWorld()->boulderInFront(*this)) {
+			Direction dir = getWorld()->faceIceman(protestorX, protestorY);
+			this->setDirection(dir);  //Change its direction to face in the direction of the Iceman]
+			this->moveProtestor();//then take one step toward iceman
+			m_distancetoTravel = 0;
+			rest_state = 0;
+			return;
+		}
+		//6 iceman not in sight DONE
+		else {
+			m_distancetoTravel--; //decrement numSquaresToMoveInCurrentDirection
+			if (m_distancetoTravel <= 0) {
+				pickRandDirection(protestorX, protestorY);
+				this->moveProtestor();
+				if (m_distancetoTravel <= 0) {
+					m_distancetoTravel = numSquaresToMoveInCurrentDirection();
+
+				}
+			}
+		}
+		//7  DONE
+		if (getWorld()->canTurn(protestorX, protestorY, this->getDirection())) {
+			if (m_perpendicular_tick <= 0) {
+				//set the direction to the selected perp. direction
+				this->setDirection(getWorld()->makeTurn(protestorX, protestorY, this->getDirection()));
+				//pick a new value for numSquares
+				m_distancetoTravel = numSquaresToMoveInCurrentDirection();
+
+				m_perpendicular_tick = 200;
+			}
+			else {
+				m_perpendicular_tick--;
+			}
+		}
+		else {
+			m_perpendicular_tick--;
+		}
+
+		//8  actual movement
+		this->moveProtestor();
+	}
+	//9 DONE
+	m_distancetoTravel--;
+	rest_state = 0;
+	if (m_shout != 0) {
+		m_shout--;
+	}
+	//this line is just testing
+	//getWorld()->leaveField(protestorX, protestorY);
 }
