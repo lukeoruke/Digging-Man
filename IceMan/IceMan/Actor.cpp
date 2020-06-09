@@ -18,7 +18,7 @@ const int ICEMAN_START_Y = 60;
 //                               |                               |
 //                     ______________________           ____________________
 //                    |                      |
-//                  ICEMAN               Protestor
+//                  ICEMAN               Protester
 //                                       |       |      
 //                                   Reg. Prot.   HC. PROT.
 //                                                                            
@@ -87,7 +87,7 @@ Squirt::Squirt(StudentWorld* world, int row, int col, GraphObject::Direction dir
 	m_travel_distance = 4;
 }
 void Squirt::doSomething() {
-	if (m_travel_distance > 0 && !getWorld()->annoyNearbyPeople(*this, 2)) {
+	if (m_travel_distance > 0 && getWorld()->annoyNearbyPeople(*this, 2)) {
 		m_travel_distance = 0;
 	}
 	else if (m_travel_distance > 0 && !getWorld()->iceInFront(*this) && !getWorld()->boulderInTheWay(*this, 1)) {
@@ -100,13 +100,13 @@ void Squirt::doSomething() {
 	}
 	return;
 }
-	bool Squirt::annoy(unsigned int amt)
-	{
-		return false;
-	}
-	Squirt::~Squirt() {
-		setDead();
-	}
+bool Squirt::annoy(unsigned int amt)
+{
+	return false;
+}
+Squirt::~Squirt() {
+	setDead();
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -325,7 +325,7 @@ int Goodies::getItemSound() const {
 bool Goodies::getIsActiveOnPlayer() const {
 	return is_active_on_player;
 }
-bool Goodies::getIsActiveOnProtestor() const {
+bool Goodies::getIsActiveOnProtester() const {
 	return is_active_on_protest;
 }
 Goodies::goodieState Goodies::getItemState() const {
@@ -397,7 +397,7 @@ void Gold::doSomething() {
 		}
 	}
 	if (this->getItemState() == temporary) {  //any item that is in a temporary state will come here and count down(dropped gold, sonar, water)
-		if (getWorld()->protestorFoundGold(*this))
+		if (getWorld()->protesterFoundGold(*this))
 		{
 			setDead();
 			GameController::getInstance().playSound(SOUND_PROTESTER_FOUND_GOLD);
@@ -524,24 +524,26 @@ int Person::getHP() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////PROTESTOR////////////////////////////////////////////
+//////////////////////////////////////////PROTESTER////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-Protestor::Protestor(StudentWorld* world, int x, int y, int imageID, unsigned int health)
+Protester::Protester(StudentWorld* world, int x, int y, int imageID, unsigned int health)
 	:Person(world, imageID, x, y, left, health)
 {
 	m_leaveState = false;
 	rest_state = 0;
 	//player->getIceman();
 	m_distancetoTravel = 0;
-
+	getWorld()->incProtestersLeft();
 
 }
 
-Protestor::~Protestor()
-{}
+Protester::~Protester()
+{
+	getWorld()->decProtestersLeft();
+}
 
-//bool Protestor::annoy(unsigned int amt)
+//bool Protester::annoy(unsigned int amt)
 //{
 //	if (getIsLeaving())
 //		return false;
@@ -550,11 +552,11 @@ Protestor::~Protestor()
 //	return true;
 //}
 
-bool Protestor::getIsLeaving()
+bool Protester::getIsLeaving()
 {
 	return m_leaveState;
 }
-//bool Protestor::oppositeDirection() {  //the cases are the protestors direction
+//bool Protester::oppositeDirection() {  //the cases are the protesters direction
 //	Direction x = getWorld()->getIcemanDirection();
 //	Direction dir = this->getDirection();
 //	switch (dir) {
@@ -595,7 +597,7 @@ bool Protestor::getIsLeaving()
 //	}
 //
 //}
-void Protestor::moveProtestor() {
+void Protester::moveProtester() {
 	switch (this->getDirection()) {
 	case left:  //x-1
 		if (this->getX() > 0 && !(getWorld()->boulderInTheWay(*this, 1)) && !(getWorld()->iceInFront(*this))) {
@@ -633,7 +635,7 @@ void Protestor::moveProtestor() {
 	}
 }
 
-void Protestor::pickRandDirection(int protestorX, int protestorY) {
+void Protester::pickRandDirection(int protesterX, int protesterY) {
 	bool outofBounds;
 	do {
 		int direction = rand() % 4 + 1;
@@ -641,7 +643,7 @@ void Protestor::pickRandDirection(int protestorX, int protestorY) {
 		switch (direction) {
 		case 1: ///move up
 			this->setDirection(up);
-			if (protestorY + 1 >= MAX_WINDOW - 4) {
+			if (protesterY + 1 >= MAX_WINDOW - 4) {
 				outofBounds = true;
 			}
 
@@ -651,7 +653,7 @@ void Protestor::pickRandDirection(int protestorX, int protestorY) {
 			break;
 		case 2: //move right
 			this->setDirection(right);
-			if (protestorX + 1 >= MAX_WINDOW - 4) {
+			if (protesterX + 1 >= MAX_WINDOW - 4) {
 				outofBounds = true;
 			}
 			else {
@@ -660,7 +662,7 @@ void Protestor::pickRandDirection(int protestorX, int protestorY) {
 			break;
 		case 3: //move down
 			this->setDirection(down);
-			if (protestorY - 1 <= 0) {
+			if (protesterY - 1 <= 0) {
 				outofBounds = true;
 			}
 			else {
@@ -669,7 +671,7 @@ void Protestor::pickRandDirection(int protestorX, int protestorY) {
 			break;
 		case 4: //move left
 			this->setDirection(left);
-			if (protestorX - 1 <= 0) {
+			if (protesterX - 1 <= 0) {
 				outofBounds = true;
 			}
 			else {
@@ -686,15 +688,15 @@ void Protestor::pickRandDirection(int protestorX, int protestorY) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////REGULAR//////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
-RegularProtestor::RegularProtestor(StudentWorld* world, int x, int y)
-	:Protestor(world, x, y, IID_PROTESTER, 5)
+RegularProtester::RegularProtester(StudentWorld* world, int x, int y)
+	:Protester(world, x, y, IID_PROTESTER, 5)
 {
 	m_ticksWait = std::max(0, 3 - static_cast<int>(getWorld()->getLevel()) / 4);
 	m_shout = 0;
 	m_perpendicular_tick = 0;
 }
 
-bool RegularProtestor::annoy(unsigned int amt) {
+bool RegularProtester::annoy(unsigned int amt) {
 	if (!m_leaveState)
 	{
 		m_HP -= amt;
@@ -716,7 +718,7 @@ bool RegularProtestor::annoy(unsigned int amt) {
 		else
 		{
 			GameController::getInstance().playSound(SOUND_PROTESTER_ANNOYED);
-			//TODO: set ticks to make protestor wait for N = max(50, 100 – current_level_number * 10) 
+			//TODO: set ticks to make protester wait for N = max(50, 100 – current_level_number * 10) 
 			rest_state = -1 * std::max(50, 100 - static_cast<int>(getWorld()->getLevel()) * 10);
 		}
 		return true;
@@ -724,11 +726,11 @@ bool RegularProtestor::annoy(unsigned int amt) {
 	return false;
 }
 
-int RegularProtestor::numSquaresToMoveInCurrentDirection() {
+int RegularProtester::numSquaresToMoveInCurrentDirection() {
 	return rand() % 53 + 8;     // 8-60
 }
 
-void RegularProtestor::doSomething() {
+void RegularProtester::doSomething() {
 	if (!this->getIsAlive()) { //1
 		return;
 	}
@@ -737,23 +739,23 @@ void RegularProtestor::doSomething() {
 		this->rest_state++;
 		return;
 	}
-	
-	int protestorX = this->getX();
-	int protestorY = this->getY();
-	//std::cout << "the protestor x and y are " << protestorX << "  " << protestorY;
+
+	int protesterX = this->getX();
+	int protesterY = this->getY();
+	//std::cout << "the protester x and y are " << protesterX << "  " << protesterY;
 	if (getIsLeaving() && rest_state == m_ticksWait) { //3
 
-		if (protestorX == 60 && protestorY == 60) { //a
+		if (protesterX == 60 && protesterY == 60) { //a
 			this->setDead();
 		}
 		if (stepsToLeave.empty()) {  //if the vector is  empty
-			stepsToLeave = getWorld()->leaveField(protestorX, protestorY);
+			stepsToLeave = getWorld()->leaveField(protesterX, protesterY);
 		}
 		else {
 			Direction d = stepsToLeave.front();
 			stepsToLeave.erase(stepsToLeave.begin());  //this should pop front of vec
 			this->setDirection(d);
-			this->moveProtestor();
+			this->moveProtester();
 			return;
 		}
 		return;
@@ -764,8 +766,8 @@ void RegularProtestor::doSomething() {
 			m_distancetoTravel = numSquaresToMoveInCurrentDirection();
 		}
 		//4 DONE
-		  if (getWorld()->icemanNearby(*this, protestorX, protestorY, 4.0) && getWorld()->isFacingIceman(*this)) {
-			if (m_shout == 0) { //protestor has not shoulted in the last non resting 15 ticks
+		if (getWorld()->icemanNearby(*this, protesterX, protesterY, 4.0) && getWorld()->isFacingIceman(*this)) {
+			if (m_shout == 0) { //protester has not shoulted in the last non resting 15 ticks
 				m_shout = 15;
 				GameController::getInstance().playSound(SOUND_PROTESTER_YELL);
 				getWorld()->annoyIceman(2);
@@ -775,11 +777,11 @@ void RegularProtestor::doSomething() {
 			return;
 		}
 		//5 straight hor or ver line of sight from iceman, 4 untis away from iceman DONE
-		if (getWorld()->icemanInSight(protestorX, protestorY) && getWorld()->
-			protestorRadius(protestorX, protestorY) >= 4.0 && getWorld()->canReachIceman(protestorX, protestorY) && !getWorld()->boulderInFront(*this)) {
-			Direction dir = getWorld()->faceIceman(protestorX, protestorY);
+		if (getWorld()->icemanInSight(protesterX, protesterY) && getWorld()->
+			protesterRadius(protesterX, protesterY) >= 4.0 && getWorld()->canReachIceman(protesterX, protesterY) && !getWorld()->boulderInFront(*this)) {
+			Direction dir = getWorld()->faceIceman(protesterX, protesterY);
 			this->setDirection(dir);  //Change its direction to face in the direction of the Iceman]
-			this->moveProtestor();//then take one step toward iceman
+			this->moveProtester();//then take one step toward iceman
 			m_distancetoTravel = 0;
 			rest_state = 0;
 			return;
@@ -788,8 +790,8 @@ void RegularProtestor::doSomething() {
 		else {
 			m_distancetoTravel--; //decrement numSquaresToMoveInCurrentDirection
 			if (m_distancetoTravel <= 0) {
-				pickRandDirection(protestorX, protestorY);
-				this->moveProtestor();
+				pickRandDirection(protesterX, protesterY);
+				this->moveProtester();
 				if (m_distancetoTravel <= 0) {
 					m_distancetoTravel = numSquaresToMoveInCurrentDirection();
 
@@ -797,10 +799,10 @@ void RegularProtestor::doSomething() {
 			}
 		}
 		//7  DONE
-		if (getWorld()->canTurn(protestorX, protestorY, this->getDirection())) {
+		if (getWorld()->canTurn(protesterX, protesterY, this->getDirection())) {
 			if (m_perpendicular_tick <= 0) {
 				//set the direction to the selected perp. direction
-				this->setDirection(getWorld()->makeTurn(protestorX, protestorY, this->getDirection()));
+				this->setDirection(getWorld()->makeTurn(protesterX, protesterY, this->getDirection()));
 				//pick a new value for numSquares
 				m_distancetoTravel = numSquaresToMoveInCurrentDirection();
 
@@ -815,7 +817,7 @@ void RegularProtestor::doSomething() {
 		}
 
 		//8  actual movement
-		this->moveProtestor();
+		this->moveProtester();
 	}
 	//9 DONE
 	m_distancetoTravel--;
@@ -824,24 +826,24 @@ void RegularProtestor::doSomething() {
 		m_shout--;
 	}
 	//this line is just testing
-	//getWorld()->leaveField(protestorX, protestorY);
+	//getWorld()->leaveField(protesterX, protesterY);
 }
 
-void RegularProtestor::gainGold() {
+void RegularProtester::gainGold() {
 	m_leaveState = true;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////HARDCORE/////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
-HardcoreProtestor::HardcoreProtestor(StudentWorld* world, int x, int y)
-	:Protestor(world, x, y, IID_HARD_CORE_PROTESTER, 20)
+HardcoreProtester::HardcoreProtester(StudentWorld* world, int x, int y)
+	:Protester(world, x, y, IID_HARD_CORE_PROTESTER, 20)
 {
 	m_ticksWait = std::max(0, 3 - static_cast<int>(getWorld()->getLevel()) / 4);
 	m_shout = 0;
 	m_perpendicular_tick = 0;
 }
 
-bool HardcoreProtestor::annoy(unsigned int amt) {
+bool HardcoreProtester::annoy(unsigned int amt) {
 	if (!m_leaveState)
 	{
 		m_HP -= amt;
@@ -862,7 +864,7 @@ bool HardcoreProtestor::annoy(unsigned int amt) {
 		else
 		{
 			GameController::getInstance().playSound(SOUND_PROTESTER_ANNOYED);
-			//TODO: set ticks to make protestor wait for N = max(50, 100 – current_level_number * 10) 
+			//TODO: set ticks to make protester wait for N = max(50, 100 – current_level_number * 10) 
 			rest_state = -1 * std::max(50, 100 - static_cast<int>(getWorld()->getLevel()) * 10);
 		}
 		return true;
@@ -870,14 +872,14 @@ bool HardcoreProtestor::annoy(unsigned int amt) {
 	return false;
 }
 
-void HardcoreProtestor::gainGold()
+void HardcoreProtester::gainGold()
 {
 	rest_state = -1 * std::max(50, 100 - static_cast<int>(getWorld()->getLevel()) * 10);
 }
-int HardcoreProtestor::numSquaresToMoveInCurrentDirection() {
+int HardcoreProtester::numSquaresToMoveInCurrentDirection() {
 	return rand() % 53 + 8;     // 8-60
 }
-void HardcoreProtestor::doSomething() {
+void HardcoreProtester::doSomething() {
 	if (!this->getIsAlive()) { //1
 		return;
 	}
@@ -887,21 +889,21 @@ void HardcoreProtestor::doSomething() {
 		return;
 	}
 
-	int protestorX = this->getX();
-	int protestorY = this->getY();
+	int protesterX = this->getX();
+	int protesterY = this->getY();
 	if (getIsLeaving() && rest_state == m_ticksWait) { //3
 
-		if (protestorX == 60 && protestorY == 60) { //a
+		if (protesterX == 60 && protesterY == 60) { //a
 			this->setDead();
 		}
 		if (stepsToLeave.empty()) {  //if the vector is  empty
-			stepsToLeave = getWorld()->leaveField(protestorX, protestorY);
+			stepsToLeave = getWorld()->leaveField(protesterX, protesterY);
 		}
 		else {
 			Direction d = stepsToLeave.front();
 			stepsToLeave.erase(stepsToLeave.begin());  //this should pop front of vec
 			this->setDirection(d);
-			this->moveProtestor();
+			this->moveProtester();
 			return;
 		}
 		return;
@@ -912,8 +914,8 @@ void HardcoreProtestor::doSomething() {
 			m_distancetoTravel = numSquaresToMoveInCurrentDirection();
 		}
 		//4 DONE
-		if (getWorld()->icemanNearby(*this, protestorX, protestorY, 4.0) && getWorld()->isFacingIceman(*this)) {
-			if (m_shout == 0) { //protestor has not shoulted in the last non resting 15 ticks
+		if (getWorld()->icemanNearby(*this, protesterX, protesterY, 4.0) && getWorld()->isFacingIceman(*this)) {
+			if (m_shout == 0) { //protester has not shoulted in the last non resting 15 ticks
 				m_shout = 15;
 				GameController::getInstance().playSound(SOUND_PROTESTER_YELL);
 				getWorld()->annoyIceman(2);
@@ -923,11 +925,11 @@ void HardcoreProtestor::doSomething() {
 			return;
 		}
 		//5 straight hor or ver line of sight from iceman, 4 untis away from iceman DONE
-		if (getWorld()->icemanInSight(protestorX, protestorY) && getWorld()->
-			protestorRadius(protestorX, protestorY) >= 4.0 && getWorld()->canReachIceman(protestorX, protestorY) && !getWorld()->boulderInFront(*this)) {
-			Direction dir = getWorld()->faceIceman(protestorX, protestorY);
+		if (getWorld()->icemanInSight(protesterX, protesterY) && getWorld()->
+			protesterRadius(protesterX, protesterY) >= 4.0 && getWorld()->canReachIceman(protesterX, protesterY) && !getWorld()->boulderInFront(*this)) {
+			Direction dir = getWorld()->faceIceman(protesterX, protesterY);
 			this->setDirection(dir);  //Change its direction to face in the direction of the Iceman]
-			this->moveProtestor();//then take one step toward iceman
+			this->moveProtester();//then take one step toward iceman
 			m_distancetoTravel = 0;
 			rest_state = 0;
 			return;
@@ -936,8 +938,8 @@ void HardcoreProtestor::doSomething() {
 		else {
 			m_distancetoTravel--; //decrement numSquaresToMoveInCurrentDirection
 			if (m_distancetoTravel <= 0) {
-				pickRandDirection(protestorX, protestorY);
-				this->moveProtestor();
+				pickRandDirection(protesterX, protesterY);
+				this->moveProtester();
 				if (m_distancetoTravel <= 0) {
 					m_distancetoTravel = numSquaresToMoveInCurrentDirection();
 
@@ -945,10 +947,10 @@ void HardcoreProtestor::doSomething() {
 			}
 		}
 		//7  DONE
-		if (getWorld()->canTurn(protestorX, protestorY, this->getDirection())) {
+		if (getWorld()->canTurn(protesterX, protesterY, this->getDirection())) {
 			if (m_perpendicular_tick <= 0) {
 				//set the direction to the selected perp. direction
-				this->setDirection(getWorld()->makeTurn(protestorX, protestorY, this->getDirection()));
+				this->setDirection(getWorld()->makeTurn(protesterX, protesterY, this->getDirection()));
 				//pick a new value for numSquares
 				m_distancetoTravel = numSquaresToMoveInCurrentDirection();
 
@@ -963,7 +965,7 @@ void HardcoreProtestor::doSomething() {
 		}
 
 		//8  actual movement
-		this->moveProtestor();
+		this->moveProtester();
 	}
 	//9 DONE
 	m_distancetoTravel--;
@@ -972,5 +974,5 @@ void HardcoreProtestor::doSomething() {
 		m_shout--;
 	}
 	//this line is just testing
-	//getWorld()->leaveField(protestorX, protestorY);
+	//getWorld()->leaveField(protesterX, protesterY);
 }
