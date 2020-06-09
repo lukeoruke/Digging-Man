@@ -29,6 +29,11 @@ void StudentWorld::createNewItem() {  //21
 	return;
 }
 
+void StudentWorld::createNewProtester()
+{
+
+}
+
 int StudentWorld::getSonarWaterTick() {
 	return max(100, (300 - 10 * static_cast<int>(getLevel())));
 }
@@ -43,6 +48,7 @@ int StudentWorld::move() {
 
 	if (player->getIsAlive()) {
 		createNewItem();
+		createNewProtester();
 
 		if (player->getOilAmnt() < lvlOil()) {   //checks if player got the oil amnt
 												 //then do something for all actors in a for loop
@@ -114,7 +120,7 @@ void StudentWorld::removeDead() {
 
 	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
 	actors.erase(std::remove_if(it, actors.end(), [&](unique_ptr<Actor>& upAct)-> bool
-	{return (upAct->getIsAlive() == false); }),
+		{return (upAct->getIsAlive() == false); }),
 		actors.end());
 
 	return;
@@ -194,22 +200,22 @@ bool StudentWorld::annoyNearbyPeople(const Actor& a, unsigned int hp)
 	return ans;
 }
 
-bool StudentWorld::protestorFoundGold(const Actor& a) {
+bool StudentWorld::protesterFoundGold(const Actor& a) {
 
 	std::vector<unique_ptr<Actor>> ::iterator it = actors.begin();
 	for (; it != actors.end(); it++) {
 		if (radius(a.getX(), a.getY(), (*it)->getX(), (*it)->getY()) <= 3) {
 			if ((*it)->getID() == IID_PROTESTER) {
-				if (dynamic_cast<RegularProtestor*>((*it).get())->getIsLeaving() == false) {
-					dynamic_cast<RegularProtestor*>((*it).get())->gainGold();
+				if (dynamic_cast<RegularProtester*>((*it).get())->getIsLeaving() == false) {
+					dynamic_cast<RegularProtester*>((*it).get())->gainGold();
 					increaseScore(25);
 					return true;
 				}
 			}
 			if ((*it)->getID() == IID_HARD_CORE_PROTESTER) {
-				if (dynamic_cast<RegularProtestor*>((*it).get())->getIsLeaving() == false) {
+				if (dynamic_cast<RegularProtester*>((*it).get())->getIsLeaving() == false) {
 					increaseScore(50);
-					dynamic_cast<HardcoreProtestor*>((*it).get())->gainGold();
+					dynamic_cast<HardcoreProtester*>((*it).get())->gainGold();
 					return true;
 				}
 			}
@@ -339,17 +345,17 @@ void StudentWorld::incIcemanItem(char x) {
 	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////PROTESTOR///////////////////////////////////////////////
+//////////////////////////////////////////PROTESTER///////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
-void StudentWorld::createProtestor() {
-	unique_ptr<RegularProtestor> protestor;
-	protestor = unique_ptr<RegularProtestor>(new RegularProtestor(this, 60, 60));
-	actors.emplace_back(std::move(protestor));
+void StudentWorld::createProtester() {
+	unique_ptr<RegularProtester> protester;
+	protester = unique_ptr<RegularProtester>(new RegularProtester(this, 60, 60));
+	actors.emplace_back(std::move(protester));
 }
-void StudentWorld::createHProtestor() {
-	unique_ptr<HardcoreProtestor> protestor;
-	protestor = unique_ptr<HardcoreProtestor>(new HardcoreProtestor(this, 60, 60));
-	actors.emplace_back(std::move(protestor));
+void StudentWorld::createHProtester() {
+	unique_ptr<HardcoreProtester> protester;
+	protester = unique_ptr<HardcoreProtester>(new HardcoreProtester(this, 60, 60));
+	actors.emplace_back(std::move(protester));
 }
 
 bool StudentWorld::icemanInSight(int x, int y) {
@@ -360,7 +366,7 @@ bool StudentWorld::icemanInSight(int x, int y) {
 		return false;
 	}
 }
-double StudentWorld::protestorRadius(int x, int y) {
+double StudentWorld::protesterRadius(int x, int y) {
 	double d = (sqrt(pow(player->getX() - x, 2) + pow(player->getY() - y, 2)));
 	return d;
 }
@@ -413,8 +419,8 @@ bool StudentWorld::isFacingIceman(const Actor& a)
 bool StudentWorld::canReachIceman(int x, int y) { //TODO:: cannot figure out the boulder issue
 	int px = player->getX();
 	int py = player->getY();
-	if (px == x) {  //if the protestor and iceman have the same X coord
-		if (py > y) { //if the player is higher then the protestor
+	if (px == x) {  //if the protester and iceman have the same X coord
+		if (py > y) { //if the player is higher then the protester
 			int startY = y;
 			while (startY < py) {
 				if (iceContainer[x][startY] || iceContainer[x + 1][startY] || iceContainer[x + 2][startY] || iceContainer[x + 3][startY])   // TODO:: account for boulders
@@ -438,7 +444,7 @@ bool StudentWorld::canReachIceman(int x, int y) { //TODO:: cannot figure out the
 
 	}
 	//other half
-	if (py == y) {//if the protestor and iceman have the same Y coord
+	if (py == y) {//if the protester and iceman have the same Y coord
 		if (px > x) {
 			int startX = x;
 			while (startX < px) {
@@ -467,7 +473,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 
 	switch (r) {
 	case GraphObject::up:
-		if (x + 1 == 61) { //if the protestor is to the very right
+		if (x + 1 == 61) { //if the protester is to the very right
 			if ((!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3])) {
 				return true;
 			}
@@ -475,7 +481,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 				return false;
 			}
 		}
-		if (x - 1 == -1) { // if the protestor is to the very left
+		if (x - 1 == -1) { // if the protester is to the very left
 			if ((!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3])) {
 				return true;
 			}
@@ -483,7 +489,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 				return false;
 			}
 		}
-		//if there is not ice to the right or left of protestor
+		//if there is not ice to the right or left of protester
 		if (!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3]) { //no ice to the right
 			return true;
 		}
@@ -495,7 +501,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 		}
 		break;
 	case GraphObject::down: //FIXEDS
-		if (x + 1 == 61) { //if the protestor is to the very right
+		if (x + 1 == 61) { //if the protester is to the very right
 			if (!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3]) {
 				return true;
 			}
@@ -503,7 +509,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 				return false;
 			}
 		}
-		if (x - 1 == -1) { // if the protestor is to the very left
+		if (x - 1 == -1) { // if the protester is to the very left
 			if ((!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3])) {
 				return true;
 			}
@@ -511,7 +517,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 				return false;
 			}
 		}
-		//if there is no ice to the right or left of the protestor return true
+		//if there is no ice to the right or left of the protester return true
 		if (!(y + 3 > 60)) { //starts counting from 57
 			if (!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3]) { // no ice to the right 
 				return true;
@@ -528,7 +534,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 		}
 		break;
 	case GraphObject::left:
-		if (y + 1 == 61) { //if the protestor is at max height of the game
+		if (y + 1 == 61) { //if the protester is at max height of the game
 			if ((!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1])) {   //checks below
 				return true;
 			}
@@ -536,7 +542,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 				return false;
 			}
 		}
-		if (y - 1 == -1) {  //if the protestor is at min height of the game
+		if (y - 1 == -1) {  //if the protester is at min height of the game
 			if ((!iceContainer[x][y + 4] && !iceContainer[x + 3][y + 4])) { //checks above
 				return true;
 			}
@@ -544,7 +550,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 				return false;
 			}
 		}
-		//if there is not ice to the top or bottom of protestor TODO:: Check if these are right
+		//if there is not ice to the top or bottom of protester TODO:: Check if these are right
 		if (!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1]) { //no ice below him
 			return true;
 		}
@@ -556,7 +562,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 		}
 		break;
 	case GraphObject::right:
-		if (y + 1 == 61) { //if the protestor is at max height of the game
+		if (y + 1 == 61) { //if the protester is at max height of the game
 			if ((!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1])) { //checks below
 				return true;
 			}
@@ -564,7 +570,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 				return false;
 			}
 		}
-		if (y - 1 == -1) { //if the protestor is at min height of the game
+		if (y - 1 == -1) { //if the protester is at min height of the game
 			if (!iceContainer[x][y + 1] && !iceContainer[x + 3][y + 1]) { //checks above him
 				return true;
 			}
@@ -572,7 +578,7 @@ bool StudentWorld::canTurn(int x, int y, GraphObject::Direction r) {
 				return false;
 			}
 		}
-		//if there is not ice to the top or bottom of protestor
+		//if there is not ice to the top or bottom of protester
 		if (!iceContainer[x][y - 1] && !iceContainer[x + 3][y - 1]) { //no ice below him
 			return true;
 		}
@@ -616,17 +622,17 @@ GraphObject::Direction StudentWorld::makeTurn(int x, int y, GraphObject::Directi
 		}
 		break;
 	case GraphObject::down:
-		if (x + 1 == 61) { //if the protestor is to the very right
+		if (x + 1 == 61) { //if the protester is to the very right
 			if (!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3]) {
 				return GraphObject::left;
 			}
 		}
-		if (x - 1 == -1) { // if the protestor is to the very left
+		if (x - 1 == -1) { // if the protester is to the very left
 			if ((!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3])) {
 				return GraphObject::right;
 			}
 		}
-		//if there is no ice to the right or left of the protestor return 50/50
+		//if there is no ice to the right or left of the protester return 50/50
 		if (!iceContainer[x + 4][y] && !iceContainer[x + 4][y + 3] && (!iceContainer[x - 1][y] && !iceContainer[x - 1][y + 3])) {
 			if (choice == 0) {
 				return GraphObject::left;
@@ -713,12 +719,12 @@ void StudentWorld::createGrid() {
 	for (int row = 0; row <= 60; row++) {
 		for (int col = 0; col <= 60; col++) {
 			//if (row < TUNNEL_COL_START || row > TUNNEL_COL_END || col < TUNNEL_ROW) {
-				if (iceContainer[row][col].get() != nullptr) { //if there is ice or boulder, it is unreachable
-					grid[row][col] = 9999999;
-				}
-				else {
-					grid[row][col] = 1000; //if there is open space
-	 			}
+			if (iceContainer[row][col].get() != nullptr) { //if there is ice or boulder, it is unreachable
+				grid[row][col] = 9999999;
+			}
+			else {
+				grid[row][col] = 1000; //if there is open space
+			}
 			//}
 		}
 	}
@@ -733,7 +739,7 @@ void StudentWorld::createGrid() {
 }
 int StudentWorld::findPath(int proX, int proY) {
 	createGrid();
-	cout << player->getX() <<endl;
+	cout << player->getX() << endl;
 	cout << player->getY() << endl;
 
 	tree.push(gridQueue(60, 60));
@@ -751,27 +757,27 @@ int StudentWorld::findPath(int proX, int proY) {
 			return distance;
 		}
 		//if (row != proX &&  col != proY) {
-			if (grid[row][col] == 1000 ) { //current point
-				grid[row][col] = distance;
-				distance++;
-			}
-			if (grid[row][col + 1] == 1000) {  //above the point
-				grid[row][col + 1] = distance;
-				tree.push(gridQueue(row, col + 1));
-			}
-			if (grid[row + 1][col] == 1000) {  //right the point
-				grid[row + 1][col] = distance;
-				tree.push(gridQueue(row + 1, col));
-			}
-			if (grid[row][col - 1] == 1000) {   //below the point
-				grid[row][col - 1] = distance;
-				tree.push(gridQueue(row, col - 1));
-			}
-			if (grid[row - 1][col] ==1000 ) {  //left of point
-				grid[row - 1][col] = distance;
-				tree.push(gridQueue(row - 1, col));
-			}
+		if (grid[row][col] == 1000) { //current point
+			grid[row][col] = distance;
 			distance++;
+		}
+		if (grid[row][col + 1] == 1000) {  //above the point
+			grid[row][col + 1] = distance;
+			tree.push(gridQueue(row, col + 1));
+		}
+		if (grid[row + 1][col] == 1000) {  //right the point
+			grid[row + 1][col] = distance;
+			tree.push(gridQueue(row + 1, col));
+		}
+		if (grid[row][col - 1] == 1000) {   //below the point
+			grid[row][col - 1] = distance;
+			tree.push(gridQueue(row, col - 1));
+		}
+		if (grid[row - 1][col] == 1000) {  //left of point
+			grid[row - 1][col] = distance;
+			tree.push(gridQueue(row - 1, col));
+		}
+		distance++;
 
 		//}
 	}
@@ -782,26 +788,26 @@ int StudentWorld::findPath(int proX, int proY) {
 GraphObject::Direction StudentWorld::pickPath(int proX, int proY, int distance) {
 	//EX the distance is 6
 	//while (distance != 0) {
-		if (grid[proX][proY + 1] == distance - 1) { //up
-			stepsToLeave.push_back(GraphObject::up);
-			return GraphObject::up;
-		}
-		if (grid[proX + 1][proY] == distance - 1) { //right
-			stepsToLeave.push_back(GraphObject::right);
-			return GraphObject::right;
-		}
-		if (grid[proX][proY - 1] == distance - 1) {
-			stepsToLeave.push_back(GraphObject::down);
-			return GraphObject::down;
-		}
-		if (grid[proX - 1][proY] == distance - 1) {
-			stepsToLeave.push_back(GraphObject::left);
-			return GraphObject::left;
-		}
+	if (grid[proX][proY + 1] == distance - 1) { //up
+		stepsToLeave.push_back(GraphObject::up);
+		return GraphObject::up;
+	}
+	if (grid[proX + 1][proY] == distance - 1) { //right
+		stepsToLeave.push_back(GraphObject::right);
+		return GraphObject::right;
+	}
+	if (grid[proX][proY - 1] == distance - 1) {
+		stepsToLeave.push_back(GraphObject::down);
+		return GraphObject::down;
+	}
+	if (grid[proX - 1][proY] == distance - 1) {
+		stepsToLeave.push_back(GraphObject::left);
+		return GraphObject::left;
+	}
 	//}
 
 }
-std::vector<GraphObject::Direction> StudentWorld::leaveField(int proX, int proY) {  
+std::vector<GraphObject::Direction> StudentWorld::leaveField(int proX, int proY) {
 	//use threads to search multiple places at once
 	//vector<int> options;
 	//for (int r = 0; r < 4; r++) {
@@ -813,8 +819,8 @@ std::vector<GraphObject::Direction> StudentWorld::leaveField(int proX, int proY)
 	int j = proX;
 	int k = proY;
 	if (stepsToLeave.empty()) {
-		//findPath(proX, proY); //sets the distance from protestor to exit			leaveField																			  //|
-		int distance = StudentWorld::findPath(proX,proY);  // returns the shortes distance 
+		//findPath(proX, proY); //sets the distance from protester to exit			leaveField																			  //|
+		int distance = StudentWorld::findPath(proX, proY);  // returns the shortes distance 
 		while (distance != 0) {
 			GraphObject::Direction q = pickPath(j, k, distance);
 			if (q == GraphObject::up) {
@@ -829,7 +835,7 @@ std::vector<GraphObject::Direction> StudentWorld::leaveField(int proX, int proY)
 			if (q == GraphObject::left) {
 				j--;
 			}
- 			distance--;
+			distance--;
 		}
 	}
 
@@ -1114,6 +1120,16 @@ void StudentWorld::decWaterLeft() {
 }
 void StudentWorld::incWaterLeft() {
 	m_waterleft++;
+}
+
+void StudentWorld::incProtestersLeft()
+{
+	m_protestersleft++;
+}
+
+void StudentWorld::decProtestersLeft()
+{
+	m_protestersleft--;
 }
 
 int StudentWorld::getWaterLeft() const {
