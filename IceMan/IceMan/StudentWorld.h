@@ -43,7 +43,7 @@ public:
 		m_sonarleft = 0;
 		m_protestersleft = 0;
 		m_waterleft = 0;
-		ticksLastProtester = 0;
+		m_ticksLastProtester = 0;
 	}
 	//destructor
 	~StudentWorld();
@@ -64,6 +64,7 @@ public:
 	int lvlBoulder(); //returns amount of boulders in current level
 	int lvlGold(); //returns amount of gold in current level
 	int lvlOil(); //returns amount of oil in current level
+	int lvlProtestors(); //returns max amount of protestors in current level
 
 	void overlap(const Actor& a);
 	bool overlapAt(int x, int y);
@@ -112,7 +113,9 @@ public:
 	int getOilLeft() const;
 	int getSonarLeft() const;
 	int getWaterLeft() const;
+	int getProtestersLeft() const;
 	int getSonarWaterTick();
+	int getProtesterTick();
 
 
 	//setters
@@ -162,7 +165,7 @@ private:
 	int m_protestersleft;
 	std::queue<gridQueue> tree;
 	std::vector<GraphObject::Direction> stepsToLeave;
-	int ticksLastProtester;
+	int m_ticksLastProtester;
 };
 
 
