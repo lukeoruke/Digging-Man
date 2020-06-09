@@ -18,7 +18,7 @@ class Ice;
 class Iceman;
 class Boulder;
 class Gold;
-class Protestor;
+class Protester;
 struct gridQueue {
 public:
 	gridQueue(int x, int y);
@@ -38,6 +38,12 @@ public:
 	{
 		player = nullptr;
 		m_bouldersLeft = 0;
+		m_goldleft = 0;
+		m_oilleft = 0;
+		m_sonarleft = 0;
+		m_protestersleft = 0;
+		m_waterleft = 0;
+		ticksLastProtester = 0;
 	}
 	//destructor
 	~StudentWorld();
@@ -51,8 +57,8 @@ public:
 	void createGold(int num);
 	void createSonar();
 	void createWater();
-	void createProtestor();
-	void createHProtestor();
+	void createProtester();
+	void createHProtester();
 
 	//methods
 	int lvlBoulder(); //returns amount of boulders in current level
@@ -62,7 +68,7 @@ public:
 	void overlap(const Actor& a);
 	bool overlapAt(int x, int y);
 
-	bool protestorFoundGold(const Actor& a);
+	bool protesterFoundGold(const Actor& a);
 	void annoyIceman(unsigned int hp);
 	bool annoyNearbyPeople(const Actor& a, unsigned int hp);
 	bool isRoomInFront(const Actor& a); //returns true if there is room for an object in front of player
@@ -72,10 +78,11 @@ public:
 	bool icemanNearby(const Actor& a, int x, int y, double radius);
 	void placeGold(int x, int y);
 	void createNewItem();
+	void createNewProtester();
 	void useSonar();
 	//added
 	bool icemanInSight(int x, int y);
-	double protestorRadius(int x, int y);
+	double protesterRadius(int x, int y);
 	GraphObject::Direction getIcemanDirection();
 	GraphObject::Direction faceIceman(int x, int y);
 	bool isFacingIceman(const Actor& a);
@@ -120,6 +127,8 @@ public:
 	void decSonarLeft();
 	void decWaterLeft();
 	void incWaterLeft();
+	void incProtestersLeft();
+	void decProtestersLeft();
 
 
 	//don't call these
@@ -129,8 +138,8 @@ public:
 		createBoulder(lvlBoulder());
 		createOil(lvlOil());
 		createGold(lvlGold());
-		createProtestor();
-		createHProtestor();
+		//createProtester();
+		//createHProtester();
 		return GWSTATUS_CONTINUE_GAME;
 	}
 
@@ -140,8 +149,7 @@ public:
 
 
 private:
-	//Ice* ice; //purpose?
-	//StudentWorld* world; //purpose?
+
 	std::unique_ptr<Ice> iceContainer[MAX_WINDOW][MAX_WINDOW];
 	int grid[MAX_WINDOW][MAX_WINDOW];
 	std::unique_ptr<Iceman> player;
@@ -151,8 +159,10 @@ private:
 	int m_oilleft;
 	int m_sonarleft;
 	int m_waterleft;
+	int m_protestersleft;
 	std::queue<gridQueue> tree;
 	std::vector<GraphObject::Direction> stepsToLeave;
+	int ticksLastProtester;
 };
 
 
