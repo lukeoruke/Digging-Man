@@ -31,11 +31,28 @@ void StudentWorld::createNewItem() {  //21
 
 void StudentWorld::createNewProtester()
 {
+	if (m_ticksLastProtester == 0 && getProtestersLeft() < lvlProtestors())
+	{
+		m_ticksLastProtester = getProtesterTick();
+		int probabilityOfHardcore = min(90, static_cast<int>(getLevel()) * 10 + 30);
+		if (rand() % 100 <= probabilityOfHardcore) {
+			createHProtester();
+		}
+		else
+			createProtester();
 
+	}
+	if (m_ticksLastProtester > 0)
+		m_ticksLastProtester--;
 }
 
 int StudentWorld::getSonarWaterTick() {
 	return max(100, (300 - 10 * static_cast<int>(getLevel())));
+}
+
+int StudentWorld::getProtesterTick()
+{
+	return max(25, 200 - static_cast<int>(getLevel()));
 }
 
 //pg 19
@@ -61,14 +78,15 @@ int StudentWorld::move() {
 			}
 			if (player->getIsAlive() == false)
 			{
-				//GameController::getInstance().playSound(SOUND_PLAYER_ANNOYED); //this might be done by the actor that annoying the player
 				decLives();
+				m_ticksLastProtester = 0;
 				return GWSTATUS_PLAYER_DIED;
 			}
 
 		}
 		else {
 			GameController::getInstance().playSound(SOUND_FINISHED_LEVEL);
+			m_ticksLastProtester = 0;
 			return GWSTATUS_FINISHED_LEVEL;
 		}
 		removeDead();
@@ -76,13 +94,11 @@ int StudentWorld::move() {
 
 	else {
 		decLives();
+		m_ticksLastProtester = 0;
 		return GWSTATUS_PLAYER_DIED;
 	}
 
-	//decLives();
-	//TEMP///
 	return GWSTATUS_CONTINUE_GAME;
-	//return GWSTATUS_PLAYER_DIED;
 }
 
 
@@ -213,7 +229,7 @@ bool StudentWorld::protesterFoundGold(const Actor& a) {
 				}
 			}
 			if ((*it)->getID() == IID_HARD_CORE_PROTESTER) {
-				if (dynamic_cast<RegularProtester*>((*it).get())->getIsLeaving() == false) {
+				if (dynamic_cast<HardcoreProtester*>((*it).get())->getIsLeaving() == false) {
 					increaseScore(50);
 					dynamic_cast<HardcoreProtester*>((*it).get())->gainGold();
 					return true;
@@ -356,6 +372,11 @@ void StudentWorld::createHProtester() {
 	unique_ptr<HardcoreProtester> protester;
 	protester = unique_ptr<HardcoreProtester>(new HardcoreProtester(this, 60, 60));
 	actors.emplace_back(std::move(protester));
+}
+
+int StudentWorld::lvlProtestors()
+{
+	return min(15, static_cast<int>(2 + static_cast<int>(getLevel()) * 1.5));
 }
 
 bool StudentWorld::icemanInSight(int x, int y) {
@@ -1134,6 +1155,10 @@ void StudentWorld::decProtestersLeft()
 
 int StudentWorld::getWaterLeft() const {
 	return m_waterleft;
+}
+int StudentWorld::getProtestersLeft() const
+{
+	return m_protestersleft;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////DISPLAY//////////////////////////////////////////////////
