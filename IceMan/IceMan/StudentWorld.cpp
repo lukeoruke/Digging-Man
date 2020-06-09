@@ -346,6 +346,11 @@ void StudentWorld::createProtestor() {
 	protestor = unique_ptr<RegularProtestor>(new RegularProtestor(this, 60, 60));
 	actors.emplace_back(std::move(protestor));
 }
+void StudentWorld::createHProtestor() {
+	unique_ptr<HardcoreProtestor> protestor;
+	protestor = unique_ptr<HardcoreProtestor>(new HardcoreProtestor(this, 60, 60));
+	actors.emplace_back(std::move(protestor));
+}
 
 bool StudentWorld::icemanInSight(int x, int y) {
 	if (player->getX() == x || player->getY() == y) {
@@ -718,13 +723,13 @@ void StudentWorld::createGrid() {
 		}
 	}
 	//testing one
-	for (int row = 0; row < 60; row++) {
-		for (int col = 0; col < 60; col++) {
-			if (iceContainer[row][col].get() == nullptr)
-				std::cout << row << "," << col << endl;
+	//for (int row = 0; row < 60; row++) {
+	//	for (int col = 0; col < 60; col++) {
+	//		if (iceContainer[row][col].get() == nullptr)
+	//			std::cout << row << "," << col << endl;
 
-		}
-	}
+	//	}
+	//}
 }
 int StudentWorld::findPath(int proX, int proY) {
 	createGrid();
@@ -742,7 +747,7 @@ int StudentWorld::findPath(int proX, int proY) {
 		if (row == proX && col == proY) {
 			tree.empty();
 			distance--;
-			cout << "DISTANCE IS " << distance << endl;
+			//cout << "DISTANCE IS " << distance << endl;
 			return distance;
 		}
 		//if (row != proX &&  col != proY) {
@@ -770,7 +775,7 @@ int StudentWorld::findPath(int proX, int proY) {
 
 		//}
 	}
-	cout << "2nd distance display " << distance << endl;
+	//cout << "2nd distance display " << distance << endl;
 	return distance;
 
 }
@@ -809,13 +814,7 @@ std::vector<GraphObject::Direction> StudentWorld::leaveField(int proX, int proY)
 	int k = proY;
 	if (stepsToLeave.empty()) {
 		//findPath(proX, proY); //sets the distance from protestor to exit			leaveField																			  //|
-		int distance = StudentWorld::findPath(proX,proY);  //					pickPath()	findPath->createGrid
-		//for (int row = 0; row < MAX_WINDOW; row++) {
-		//	for (int col = 0; col < MAX_WINDOW - 4; col++) {
-		//		cout << row << "," << col << "has the value " <<
-		//			grid[row][col] << endl;
-		//	}
-		//};
+		int distance = StudentWorld::findPath(proX,proY);  // returns the shortes distance 
 		while (distance != 0) {
 			GraphObject::Direction q = pickPath(j, k, distance);
 			if (q == GraphObject::up) {
@@ -833,13 +832,8 @@ std::vector<GraphObject::Direction> StudentWorld::leaveField(int proX, int proY)
  			distance--;
 		}
 	}
-	//else {
-	//	GraphObject::Direction step = stepsToLeave.front();
-	//	stepsToLeave.erase(stepsToLeave.begin());
-	//	return stepsToLeave;
-	//}
-	return stepsToLeave;
-	//how to move protestor one by one towards exit?
+
+	return stepsToLeave;  // returns a vector that has the fastest path to return to exit
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
